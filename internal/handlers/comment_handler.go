@@ -19,7 +19,7 @@ func NewCommentHandler(db *gorm.DB) *CommentHandler {
 
 func (h *CommentHandler) CreateComment(c *gin.Context) {
 	var input struct {
-		ThreadID        *uint  `json:"thread_id"`
+		ThreadID        *uint  `json:"thread_id" binding:"required"`
 		ParentCommentID *uint  `json:"parent_comment_id"`
 		Content         string `json:"content" binding:"required"`
 	}
@@ -29,8 +29,8 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 		return
 	}
 
-	if (input.ThreadID == nil && input.ParentCommentID == nil) || (input.ThreadID != nil && input.ParentCommentID != nil) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Either thread_id or parent_comment_id must be provided, but not both"})
+	if input.ThreadID == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Thread ID must be provided"})
 		return
 	}
 
@@ -47,18 +47,23 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 	}
 
 	comment := models.Comment{
-		UserID:          currentUser.UserID,
-		Content:         input.Content,
-		ThreadID:        *input.ThreadID,
-		ParentCommentID: *input.ParentCommentID,
+		UserID:  currentUser.UserID,
+		Content: input.Content,
 	}
 
-	if err := h.db.Model(&models.Thread{}).
-		Where("thread_id = ?", *input.ThreadID).
-		Update("stats", gorm.Expr("jsonb_set(stats, '{comments}', to_jsonb((stats->>'comments')::int + 1)::text::jsonb)")).
-		Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update thread stats"})
-		return
+	if input.ThreadID != nil {
+		comment.ThreadID = *input.ThreadID
+		if err := h.db.Model(&models.Thread{}).
+			Where("thread_id = ?", *input.ThreadID).
+			Update("stats", gorm.Expr("jsonb_set(stats, '{comments}', to_jsonb((stats->>'comments')::int + 1)::text::jsonb)")).
+			Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update thread stats"})
+			return
+		}
+	}
+
+	if input.ParentCommentID != nil {
+		comment.ParentCommentID = *input.ParentCommentID
 	}
 
 	if err := h.db.Create(&comment).Error; err != nil {
