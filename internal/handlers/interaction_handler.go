@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -85,9 +86,9 @@ func (h *InteractionHandler) CreateInteraction(c *gin.Context) {
 }
 
 func (h *InteractionHandler) UpdateInteraction(c *gin.Context) {
+	interactionID := c.Param("id")
+
 	var input struct {
-		ThreadID        *uint  `json:"thread_id"`
-		CommentID       *uint  `json:"comment_id"`
 		InteractionType string `json:"interaction_type" binding:"required"`
 	}
 
@@ -108,63 +109,75 @@ func (h *InteractionHandler) UpdateInteraction(c *gin.Context) {
 		return
 	}
 
-	if (input.ThreadID == nil && input.CommentID == nil) || (input.ThreadID != nil && input.CommentID != nil) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Either thread_id or comment_id must be provided, but not both"})
-		return
-	}
-
 	validTypes := map[string]bool{"upvote": true, "downvote": true, "follow": true}
 	if !validTypes[input.InteractionType] {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid interaction type"})
 		return
 	}
-	if input.InteractionType == "follow" && input.CommentID != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Follow interaction is not allowed for comments"})
-		return
-	}
 
 	var existingInteraction models.Interaction
-	err := h.db.Where("user_id = ? AND (thread_id = ? OR comment_id = ?)", currentUser.UserID, input.ThreadID, input.CommentID).
-		First(&existingInteraction).Error
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch existing interaction"})
+	if err := h.db.Where("interaction_id = ? AND user_id = ?", interactionID, currentUser.UserID).
+		First(&existingInteraction).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Interaction not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch interaction"})
+		}
 		return
 	}
 
 	if existingInteraction.InteractionType == input.InteractionType {
-		if input.ThreadID != nil {
-			h.updateThreadStats(*input.ThreadID, input.InteractionType, -1)
-		}
-		if input.CommentID != nil {
-			h.updateCommentStats(*input.CommentID, input.InteractionType, -1)
-		}
 		if err := h.db.Delete(&existingInteraction).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to undo interaction"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove interaction"})
 			return
 		}
-		existingInteraction.InteractionType = ""
-		c.JSON(http.StatusOK, gin.H{"message": "Interaction undone successfully"})
+		if existingInteraction.ThreadID != 0 {
+			if err := h.updateThreadStats(existingInteraction.ThreadID, existingInteraction.InteractionType, -1); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update thread stats"})
+				return
+			}
+		}
+		if existingInteraction.CommentID != 0 {
+			if err := h.updateCommentStats(existingInteraction.CommentID, existingInteraction.InteractionType, -1); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update comment stats"})
+				return
+			}
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Interaction removed"})
 		return
 	}
 
-	if (existingInteraction.InteractionType == "upvote" && input.InteractionType == "downvote") || (existingInteraction.InteractionType == "downvote" && input.InteractionType == "upvote") {
-		if input.ThreadID != nil {
-			h.updateThreadStats(*input.ThreadID, input.InteractionType, 1)
-			h.updateThreadStats(existingInteraction.ThreadID, existingInteraction.InteractionType, -1)
+	if (existingInteraction.InteractionType == "upvote" && input.InteractionType == "downvote") ||
+		(existingInteraction.InteractionType == "downvote" && input.InteractionType == "upvote") {
+		if existingInteraction.ThreadID != 0 {
+			if err := h.updateThreadStats(existingInteraction.ThreadID, existingInteraction.InteractionType, -1); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update thread stats"})
+				return
+			}
+			if err := h.updateThreadStats(existingInteraction.ThreadID, input.InteractionType, 1); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update thread stats"})
+				return
+			}
 		}
-		if input.CommentID != nil {
-			h.updateCommentStats(*input.CommentID, input.InteractionType, 1)
-			h.updateCommentStats(existingInteraction.CommentID, existingInteraction.InteractionType, -1)
-		}
-		if err := h.db.Delete(&existingInteraction).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to undo interaction"})
-			return
+		if existingInteraction.CommentID != 0 {
+			if err := h.updateCommentStats(existingInteraction.CommentID, existingInteraction.InteractionType, -1); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update comment stats"})
+				return
+			}
+			if err := h.updateCommentStats(existingInteraction.CommentID, input.InteractionType, 1); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update comment stats"})
+				return
+			}
 		}
 		existingInteraction.InteractionType = input.InteractionType
-		c.JSON(http.StatusOK, gin.H{"message": "Interaction toggled successfully"})
+		if err := h.db.Save(&existingInteraction).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update interaction"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Interaction updated", "interaction": existingInteraction})
 		return
 	}
+	c.JSON(http.StatusInternalServerError, gin.H{"error": "Unexpected interaction update"})
 }
 
 func (h *InteractionHandler) updateThreadStats(threadID uint, interactionType string, adjustment int) error {
