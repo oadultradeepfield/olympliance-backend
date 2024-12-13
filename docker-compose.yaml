@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: olympliance-server:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=${PORT}
+      - DSN=${DSN}
+      - JWT_SECRET=${JWT_SECRET}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - GO_ENVIRONMENT=${GO_ENVIRONMENT}
+    restart: unless-stopped

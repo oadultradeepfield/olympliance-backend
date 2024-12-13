@@ -1,13 +1,11 @@
 package middleware
 
 import (
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 	"github.com/oadultradeepfield/olympliance-server/internal/models"
 	"gorm.io/gorm"
 )
@@ -18,10 +16,6 @@ type Claims struct {
 }
 
 func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
 		if tokenString == "" || len(tokenString) <= 7 || tokenString[:7] != "Bearer " {

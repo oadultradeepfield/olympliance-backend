@@ -16,5 +16,9 @@ Dockerfile
 # Configuration files
 .air.toml
 
+# Environment variables
+.env
+.env.example
+
 # Documentation files
 *.md

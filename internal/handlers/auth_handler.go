@@ -1,14 +1,12 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 	"github.com/oadultradeepfield/olympliance-server/internal/middleware"
 	"github.com/oadultradeepfield/olympliance-server/internal/models"
 	"golang.org/x/crypto/bcrypt"
@@ -20,9 +18,6 @@ type AuthHandler struct {
 }
 
 func NewAuthHandler(db *gorm.DB) *AuthHandler {
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
 	return &AuthHandler{db: db}
 }
 
