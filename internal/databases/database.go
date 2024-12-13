@@ -26,7 +26,7 @@ func InitDB() *gorm.DB {
 		PrepareStmt: true,
 	})
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Fatalf("Error connecting to database: %v", err)
 	}
 
 	if err := db.AutoMigrate(
@@ -36,7 +36,7 @@ func InitDB() *gorm.DB {
 		&models.Interaction{},
 		&models.Category{},
 	); err != nil {
-		log.Fatalf("Failed to migrate database: %v", err)
+		log.Fatalf("Error migrating database: %v", err)
 	}
 
 	categories := []models.Category{
@@ -56,7 +56,7 @@ func InitDB() *gorm.DB {
 	for _, category := range categories {
 		result := db.FirstOrCreate(&category, models.Category{Name: category.Name})
 		if result.Error != nil {
-			log.Printf("Error inserting category %s: %v\n", category.Name, result.Error)
+			log.Fatalf("Error creating category %s: %v\n", category.Name, result.Error)
 		} else {
 			log.Printf("Category '%s' checked/added successfully!\n", category.Name)
 		}
