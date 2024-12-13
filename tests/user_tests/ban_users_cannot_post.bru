@@ -1,0 +1,25 @@
+meta {
+  name: ban_users_cannot_post
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:8080/api/threads
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOjQsInN1YiI6InVzZXIyIiwiZXhwIjoxNzM0MTY4MTgxfQ.T_Ud5q4H_AtyAWwSg_daNZJ5gpPh20ngdJgukx99ioM
+}
+
+body:json {
+  {
+    "title": "Sample Title",
+    "content": "Sample Content",
+    "category_id": 1,
+    "tags": ["tag1", "tag2"]
+  }
+  
+}

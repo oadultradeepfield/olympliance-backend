@@ -1,0 +1,15 @@
+meta {
+  name: failed_register_already_exists
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/api/register
+  body: json
+  auth: none
+}
+
+body:json {
+  { "username": "new_user", "password": "password123" }
+}

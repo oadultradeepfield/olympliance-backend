@@ -1,0 +1,22 @@
+meta {
+  name: thread_downvote_after_upvote
+  type: http
+  seq: 5
+}
+
+put {
+  url: http://localhost:8080/api/interactions/20
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOjMsInN1YiI6InVzZXIxIiwiZXhwIjoxNzM0MTY3ODI0fQ.TqIVhsCHNz0dK19ggvLvbdQr0MrpCKp4V5XuagyS-ag
+}
+
+body:json {
+  {
+    "thread_id": 2,
+    "interaction_type": "upvote"
+  }
+}

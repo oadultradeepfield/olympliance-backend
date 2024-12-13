@@ -1,0 +1,21 @@
+meta {
+  name: update_comment
+  type: http
+  seq: 3
+}
+
+put {
+  url: http://localhost:8080/api/comments/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOjMsInN1YiI6InVzZXIxIiwiZXhwIjoxNzM0MTYyNzk4fQ.h4M2ZgzMJBijmI7XJ3JIjPMcL8F33KhHt6bsiAMDP2E
+}
+
+body:json {
+  {
+    "content": "Sorry for interruption."
+  }
+}

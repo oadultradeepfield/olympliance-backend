@@ -1,0 +1,15 @@
+meta {
+  name: failed_login_invalid
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8080/api/login
+  body: json
+  auth: none
+}
+
+body:json {
+  { "username": "new_user", "password": "incorrect_password" }
+}
