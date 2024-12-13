@@ -13,7 +13,7 @@ type Thread struct {
 	Title      string          `gorm:"not null" json:"title"`
 	Content    string          `gorm:"not null" json:"content"`
 	CategoryID uint            `gorm:"not null" json:"category_id"`
-	Stats      json.RawMessage `gorm:"type:jsonb;default:'{\"views\": 0, \"followers\": 0, \"upvotes\": 0, \"downvotes\": 0, \"comments\": 0}'::jsonb" json:"stats"`
+	Stats      json.RawMessage `gorm:"type:jsonb;default:'{\"followers\": 0, \"upvotes\": 0, \"downvotes\": 0, \"comments\": 0}'::jsonb" json:"stats"`
 	Tags       pq.StringArray  `gorm:"type:text[]" json:"tags"`
 	CreatedAt  time.Time       `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt  time.Time       `gorm:"autoUpdateTime" json:"updated_at"`
