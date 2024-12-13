@@ -144,7 +144,7 @@ func (h *ThreadHandler) DeleteThread(c *gin.Context) {
 		return
 	}
 
-	if thread.UserID != currentUser.UserID {
+	if thread.UserID != currentUser.UserID && currentUser.RoleID <= 0 {
 		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to delete this thread"})
 		return
 	}

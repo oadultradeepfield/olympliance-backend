@@ -142,7 +142,7 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 		return
 	}
 
-	if comment.UserID != currentUser.UserID {
+	if comment.UserID != currentUser.UserID && currentUser.RoleID <= 0 {
 		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to delete this comment"})
 		return
 	}
