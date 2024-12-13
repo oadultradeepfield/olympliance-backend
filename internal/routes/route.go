@@ -32,6 +32,7 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	// Protected Routes
 	api := r.Group("/api")
 	api.Use(middleware.AuthMiddleware(db))
+	api.Use(middleware.BanCheckMiddleware(db))
 
 	api.POST("/change-password", userHandler.ChangePassword)
 
