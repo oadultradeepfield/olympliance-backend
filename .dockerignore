@@ -1,0 +1,20 @@
+# Directories to exclude
+vendor/
+tests/
+tmp/
+
+# System files
+*.DS_Store
+
+# Git-related files
+.git/
+.gitignore
+
+# Dockerfile
+Dockerfile
+
+# Configuration files
+.air.toml
+
+# Documentation files
+*.md
