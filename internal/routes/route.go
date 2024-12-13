@@ -12,6 +12,7 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	userHandler := handlers.NewUserHandler(db)
 	threadHandler := handlers.NewThreadHandler(db)
 	commentHandler := handlers.NewCommentHandler(db)
+	interactionHandler := handlers.NewInteractionHandler(db)
 
 	r.Use(middleware.CorsMiddleware())
 
@@ -43,4 +44,8 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	api.POST("/comments", commentHandler.CreateComment)
 	api.PUT("/comments/:id", commentHandler.UpdateComment)
 	api.DELETE("/comments/:id", commentHandler.DeleteComment)
+
+	// Interaction
+	api.POST("/interactions", interactionHandler.CreateInteraction)
+	api.PUT("/interactions/:id", interactionHandler.UpdateInteraction)
 }
