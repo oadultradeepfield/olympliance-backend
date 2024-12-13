@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/oadultradeepfield/olympliance-server/internal/models"
+	"github.com/robfig/cron/v3"
 	"gorm.io/gorm"
 )
 
@@ -73,4 +74,31 @@ func (b *ReputationCalculator) AssignReputationToUser(userID uint) error {
 	}
 
 	return nil
+}
+
+func (b *ReputationCalculator) ScheduleDailyReputationJob() {
+	c := cron.New()
+
+	// Schedule a daily reputation update
+	_, err := c.AddFunc("0 0 * * *", func() {
+		var users []models.User
+		if err := b.db.Find(&users).Error; err != nil {
+			log.Fatalf("Failed to fetch users: %v", err)
+			return
+		}
+
+		for _, user := range users {
+			if err := b.AssignReputationToUser(user.UserID); err != nil {
+				log.Fatalf("Failed to assign reputation to user %d: %v", user.UserID, err)
+			} else {
+				log.Printf("Successfully updated reputation for user %d", user.UserID)
+			}
+		}
+	})
+
+	if err != nil {
+		log.Fatalf("Failed to schedule cron job: %v", err)
+	}
+
+	c.Start()
 }

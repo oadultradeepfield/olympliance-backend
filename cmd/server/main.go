@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/oadultradeepfield/olympliance-server/internal/databases"
 	"github.com/oadultradeepfield/olympliance-server/internal/routes"
+	"github.com/oadultradeepfield/olympliance-server/internal/services"
 )
 
 func main() {
@@ -21,7 +22,10 @@ func main() {
 
 	db := databases.InitDB()
 
-	r := gin.New()
+	reputationCalculator := services.NewReputationCalculator(db)
+	reputationCalculator.ScheduleDailyReputationJob()
+
+	r := gin.Default()
 
 	routes.InitRoutes(r, db)
 
