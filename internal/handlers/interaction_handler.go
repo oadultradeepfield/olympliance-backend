@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,22 @@ func (h *InteractionHandler) CreateInteraction(c *gin.Context) {
 		return
 	}
 
+	if (input.ThreadID == nil && input.CommentID == nil) || (input.ThreadID != nil && input.CommentID != nil) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Either thread_id or comment_id must be provided, but not both"})
+		return
+	}
+
+	validTypes := map[string]bool{"upvote": true, "downvote": true, "follow": true}
+	if !validTypes[input.InteractionType] {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid interaction type"})
+		return
+	}
+
+	if input.InteractionType == "follow" && input.CommentID != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Follow interaction is not allowed for comments"})
+		return
+	}
+
 	user, exists := c.Get("user")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
@@ -41,26 +58,56 @@ func (h *InteractionHandler) CreateInteraction(c *gin.Context) {
 		return
 	}
 
-	if (input.ThreadID == nil && input.CommentID == nil) || (input.ThreadID != nil && input.CommentID != nil) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Either thread_id or comment_id must be provided, but not both"})
-		return
+	var existingInteraction models.Interaction
+	if input.ThreadID != nil {
+		if input.InteractionType == "follow" {
+			if err := h.db.Where("user_id = ? AND thread_id = ? AND interaction_type = ?", currentUser.UserID, *input.ThreadID, "follow").First(&existingInteraction).Error; err == nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Already following this thread"})
+				return
+			}
+		} else {
+			if err := h.db.Where("user_id = ? AND thread_id = ? AND interaction_type = ?", currentUser.UserID, *input.ThreadID, input.InteractionType).First(&existingInteraction).Error; err == nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Interaction already exists for this thread"})
+				return
+			}
+
+			if err := h.db.Where("user_id = ? AND thread_id = ? AND interaction_type IN (?, ?)", currentUser.UserID, *input.ThreadID, "upvote", "downvote").First(&existingInteraction).Error; err == nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "User has already voted on this thread"})
+				return
+			}
+		}
 	}
 
-	validTypes := map[string]bool{"upvote": true, "downvote": true, "follow": true}
-	if !validTypes[input.InteractionType] {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid interaction type"})
-		return
-	}
-	if input.InteractionType == "follow" && input.CommentID != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Follow interaction is not allowed for comments"})
-		return
+	if input.CommentID != nil {
+		if input.InteractionType == "follow" {
+			if err := h.db.Where("user_id = ? AND comment_id = ? AND interaction_type = ?", currentUser.UserID, *input.CommentID, "follow").First(&existingInteraction).Error; err == nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Already following this comment"})
+				return
+			}
+		} else {
+			if err := h.db.Where("user_id = ? AND comment_id = ? AND interaction_type = ?", currentUser.UserID, *input.CommentID, input.InteractionType).First(&existingInteraction).Error; err == nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Interaction already exists for this comment"})
+				return
+			}
+
+			if err := h.db.Where("user_id = ? AND comment_id = ? AND interaction_type IN (?, ?)", currentUser.UserID, *input.CommentID, "upvote", "downvote").First(&existingInteraction).Error; err == nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "User has already voted on this comment"})
+				return
+			}
+		}
 	}
 
 	interaction := models.Interaction{
 		UserID:          currentUser.UserID,
-		ThreadID:        *input.ThreadID,
-		CommentID:       *input.CommentID,
 		InteractionType: input.InteractionType,
+	}
+
+	if input.ThreadID != nil {
+		interaction.ThreadID = *input.ThreadID
+	}
+
+	if input.CommentID != nil {
+		interaction.CommentID = *input.CommentID
 	}
 
 	if err := h.db.Create(&interaction).Error; err != nil {
@@ -181,43 +228,38 @@ func (h *InteractionHandler) UpdateInteraction(c *gin.Context) {
 }
 
 func (h *InteractionHandler) updateThreadStats(threadID uint, interactionType string, adjustment int) error {
-	field := ""
-	switch interactionType {
-	case "upvote":
-		field = "upvotes"
-	case "downvote":
-		field = "downvotes"
-	case "follow":
-		field = "followers"
+	fields := map[string]string{
+		"upvote":   "upvotes",
+		"downvote": "downvotes",
+		"follow":   "followers",
 	}
 
-	if field == "" {
-		return nil
+	field, exists := fields[interactionType]
+	if !exists {
+		return fmt.Errorf("invalid interaction type: %s", interactionType)
 	}
 
 	return h.db.Model(&models.Thread{}).
 		Where("thread_id = ?", threadID).
 		Update("stats", gorm.Expr(
-			"jsonb_set(stats, '{%s}', to_jsonb((stats->>'%s')::int + ?)::text::jsonb)",
-			field, field, adjustment)).Error
+			"jsonb_set(stats, '{"+field+"}', to_jsonb(((stats->>'"+field+"')::int + ?)::int))",
+			adjustment)).Error
 }
 
 func (h *InteractionHandler) updateCommentStats(commentID uint, interactionType string, adjustment int) error {
-	field := ""
-	switch interactionType {
-	case "upvote":
-		field = "upvotes"
-	case "downvote":
-		field = "downvotes"
+	fields := map[string]string{
+		"upvote":   "upvotes",
+		"downvote": "downvotes",
 	}
 
-	if field == "" {
-		return nil
+	field, exists := fields[interactionType]
+	if !exists {
+		return fmt.Errorf("invalid interaction type: %s", interactionType)
 	}
 
 	return h.db.Model(&models.Comment{}).
 		Where("comment_id = ?", commentID).
 		Update("stats", gorm.Expr(
-			"jsonb_set(stats, '{%s}', to_jsonb((stats->>'%s')::int + ?)::text::jsonb)",
-			field, field, adjustment)).Error
+			"jsonb_set(stats, '{"+field+"}', to_jsonb(((stats->>'"+field+"')::int + ?)::int))",
+			adjustment)).Error
 }
