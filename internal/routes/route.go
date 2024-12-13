@@ -34,7 +34,9 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	api.Use(middleware.AuthMiddleware(db))
 	api.Use(middleware.BanCheckMiddleware(db))
 
-	api.POST("/change-password", userHandler.ChangePassword)
+	api.POST("/users/change-password", userHandler.ChangePassword)
+	api.POST("/users/:id/toggle-ban", userHandler.ToggleBanUser)
+	api.POST("/users/:id/toggle-moderator", userHandler.ToggleAssignModerator)
 
 	// Threads
 	api.POST("/threads", threadHandler.CreateThread)
