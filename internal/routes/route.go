@@ -22,7 +22,6 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	// Unprotected Routes
 	r.GET("/api/threads/:id", threadHandler.GetThread)
 	r.GET("/api/threads/category/:category_id", threadHandler.GetAllThreadsByCategory)
-	r.GET("/api/comments/:id", commentHandler.GetComment)
 	r.GET("/api/comments", commentHandler.GetAllComments)
 
 	// Authentication Routes

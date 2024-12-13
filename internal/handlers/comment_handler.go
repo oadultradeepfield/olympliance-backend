@@ -75,18 +75,6 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"comment": comment})
 }
 
-func (h *CommentHandler) GetComment(c *gin.Context) {
-	commentID := c.Param("id")
-	var comment models.Comment
-
-	if err := h.db.First(&comment, commentID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"comment": comment})
-}
-
 func (h *CommentHandler) UpdateComment(c *gin.Context) {
 	commentID := c.Param("id")
 	var input struct {
