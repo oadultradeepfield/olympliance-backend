@@ -18,7 +18,7 @@ func main() {
 	db := databases.InitDB()
 
 	reputationCalculator := services.NewReputationCalculator(db)
-	reputationCalculator.ScheduleDailyReputationJob()
+	reputationCalculator.CalculateReputationOnStartup()
 
 	r := gin.Default()
 
