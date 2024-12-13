@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/oadultradeepfield/olympliance-server/internal/models"
@@ -48,23 +49,16 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 	comment := models.Comment{
 		UserID:          currentUser.UserID,
 		Content:         input.Content,
-		ThreadID:        0,
-		ParentCommentID: 0,
+		ThreadID:        *input.ThreadID,
+		ParentCommentID: *input.ParentCommentID,
 	}
 
-	if input.ThreadID != nil {
-		comment.ThreadID = *input.ThreadID
-
-		if err := h.db.Model(&models.Thread{}).
-			Where("thread_id = ?", *input.ThreadID).
-			Update("stats", gorm.Expr("jsonb_set(stats, '{comments}', to_jsonb((stats->>'comments')::int + 1)::text::jsonb)")).
-			Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update thread stats"})
-			return
-		}
-
-	} else if input.ParentCommentID != nil {
-		comment.ParentCommentID = *input.ParentCommentID
+	if err := h.db.Model(&models.Thread{}).
+		Where("thread_id = ?", *input.ThreadID).
+		Update("stats", gorm.Expr("jsonb_set(stats, '{comments}', to_jsonb((stats->>'comments')::int + 1)::text::jsonb)")).
+		Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update thread stats"})
+		return
 	}
 
 	if err := h.db.Create(&comment).Error; err != nil {
@@ -159,12 +153,12 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 func (h *CommentHandler) GetAllComments(c *gin.Context) {
 	var comments []models.Comment
 
+	threadIDStr := c.DefaultQuery("thread_id", "")
 	isDeleted := c.DefaultQuery("is_deleted", "false")
 	showDeleted := isDeleted == "true"
-
 	sortBy := c.DefaultQuery("sort_by", "updated_at")
-	validSortFields := []string{"upvotes", "created_at", "updated_at"}
 
+	validSortFields := []string{"upvotes", "created_at", "updated_at"}
 	if !contains(validSortFields, sortBy) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid sort_by field"})
 		return
@@ -172,6 +166,15 @@ func (h *CommentHandler) GetAllComments(c *gin.Context) {
 
 	query := h.db.Model(&models.Comment{}).
 		Where("is_deleted = ?", showDeleted)
+
+	if threadIDStr != "" {
+		threadID, err := strconv.ParseUint(threadIDStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid thread_id"})
+			return
+		}
+		query = query.Where("thread_id = ?", threadID)
+	}
 
 	query = query.Order(sortBy + " DESC")
 
