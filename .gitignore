@@ -2,3 +2,4 @@
 *.DS_Store
 .air.toml
 tmp
+tests

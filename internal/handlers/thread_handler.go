@@ -66,6 +66,11 @@ func (h *ThreadHandler) GetThread(c *gin.Context) {
 		return
 	}
 
+	if thread.IsDeleted {
+		c.JSON(http.StatusGone, gin.H{"error": "Thread is deleted"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"thread": thread})
 }
 
