@@ -59,8 +59,5 @@ func InitDB() *gorm.DB {
 
 	log.Println("Database connected, migrated, and categories added successfully")
 
-	sqlDB, _ := db.DB()
-	defer sqlDB.Close()
-
 	return db
 }
