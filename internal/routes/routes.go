@@ -50,6 +50,7 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	api.DELETE("/comments/:id", commentHandler.DeleteComment)
 
 	// Interaction
+	api.GET("/interactions", interactionHandler.GetInteraction)
 	api.POST("/interactions", interactionHandler.CreateInteraction)
 	api.PUT("/interactions/:id", interactionHandler.UpdateInteraction)
 }

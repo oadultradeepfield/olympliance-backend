@@ -18,6 +18,49 @@ func NewInteractionHandler(db *gorm.DB) *InteractionHandler {
 	return &InteractionHandler{db: db}
 }
 
+func (h *InteractionHandler) GetInteraction(c *gin.Context) {
+	threadID := c.Query("thread_id")
+	commentID := c.Query("comment_id")
+
+	if (threadID == "" && commentID == "") || (threadID != "" && commentID != "") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Either thread_id or comment_id must be provided"})
+		return
+	}
+
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	currentUser, ok := user.(*models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user data"})
+		return
+	}
+
+	var interactions []models.Interaction
+	query := h.db.Where("user_id = ?", currentUser.UserID)
+
+	if threadID != "" {
+		query = query.Where("thread_id = ?", threadID)
+	}
+	if commentID != "" {
+		query = query.Where("comment_id = ?", commentID)
+	}
+
+	if err := query.Find(&interactions).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusOK, gin.H{"interactions": []models.Interaction{}})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch interactions"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"interactions": interactions})
+}
+
 func (h *InteractionHandler) CreateInteraction(c *gin.Context) {
 	var input struct {
 		ThreadID        *uint  `json:"thread_id"`

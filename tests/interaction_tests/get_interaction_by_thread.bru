@@ -1,0 +1,19 @@
+meta {
+  name: get_interaction_by_thread
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:8080/api/interactions?thread_id=2
+  body: none
+  auth: bearer
+}
+
+params:query {
+  thread_id: 2
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOjMsInN1YiI6InVzZXIxIiwiZXhwIjoxNzM0MjI2NjU0fQ.DUkpy-bWCKhSDRN86pr0zveRytcQvnjNfhlj363vSjA
+}
