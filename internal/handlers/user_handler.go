@@ -204,7 +204,12 @@ func (h *UserHandler) ToggleBanUser(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User ban status toggled successfully"})
+	if userToBan.IsBanned {
+		c.JSON(http.StatusOK, gin.H{"message": "Successfully banned the user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully unbanned the user"})
 }
 
 func (h *UserHandler) ToggleAssignModerator(c *gin.Context) {
@@ -249,5 +254,10 @@ func (h *UserHandler) ToggleAssignModerator(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User role updated successfully"})
+	if userToAssign.RoleID == 1 {
+		c.JSON(http.StatusOK, gin.H{"message": "Successfully assigned user as moderator"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully remove user from moderators"})
 }
