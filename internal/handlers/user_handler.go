@@ -219,6 +219,18 @@ func (h *UserHandler) ToggleBanUser(c *gin.Context) {
 		return
 	}
 
+	if userToBan.IsBanned {
+		if err := h.db.Model(&models.Comment{}).Where("user_id = ?", userID).Update("is_deleted", true).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user comments"})
+			return
+		}
+
+		if err := h.db.Model(&models.Thread{}).Where("user_id = ?", userID).Update("is_deleted", true).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user threads"})
+			return
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "User ban status toggled successfully"})
 }
 
