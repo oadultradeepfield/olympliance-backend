@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/oadultradeepfield/olympliance-server/internal/models"
@@ -173,17 +174,33 @@ func (h *ThreadHandler) GetAllThreadsByCategory(c *gin.Context) {
 	sortBy := c.DefaultQuery("sort_by", "updated_at")
 
 	validSortFields := []string{"views", "followers", "upvotes", "comments", "created_at", "updated_at"}
-
 	if !contains(validSortFields, sortBy) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid sort_by field"})
 		return
 	}
 
+	page := c.DefaultQuery("page", "1")
+	perPage := c.DefaultQuery("per_page", "10")
+
+	pageInt, err := strconv.Atoi(page)
+	if err != nil || pageInt < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page number"})
+		return
+	}
+	perPageInt, err := strconv.Atoi(perPage)
+	if err != nil || perPageInt < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid per_page number"})
+		return
+	}
+
+	offset := (pageInt - 1) * perPageInt
+
 	query := h.db.Model(&models.Thread{}).
 		Where("category_id = ?", categoryID).
-		Where("is_deleted = ?", showDeleted)
-
-	query = query.Order(sortBy + " DESC")
+		Where("is_deleted = ?", showDeleted).
+		Order(sortBy + " DESC").
+		Limit(perPageInt).
+		Offset(offset)
 
 	if err := query.Find(&threads).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch threads"})
