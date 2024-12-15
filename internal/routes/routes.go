@@ -35,6 +35,7 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	api.Use(middleware.BanCheckMiddleware(db))
 
 	// Users
+	api.GET("/users/:id", userHandler.GetUserInformation)
 	api.GET("/users", userHandler.GetRoleIDandReputation)
 	api.GET("/users/:username/id", userHandler.GetUserIDbyUsername)
 	api.GET("/users/banned-users", userHandler.GetBannedUsers)

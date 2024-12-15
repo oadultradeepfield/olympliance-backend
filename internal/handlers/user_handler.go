@@ -17,6 +17,28 @@ func NewUserHandler(db *gorm.DB) *UserHandler {
 	return &UserHandler{db: db}
 }
 
+func (h *UserHandler) GetUserInformation(c *gin.Context) {
+	userID := c.Param("id")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		return
+	}
+
+	var user models.User
+	if err := h.db.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"user_id":    user.UserID,
+		"username":   user.Username,
+		"role_id":    user.RoleID,
+		"reputation": user.Reputation,
+		"is_banned":  user.IsBanned,
+	})
+}
+
 func (h *UserHandler) GetUserIDbyUsername(c *gin.Context) {
 	currentUser, exists := c.Get("user")
 	if !exists {
