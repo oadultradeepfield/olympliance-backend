@@ -21,6 +21,7 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	})
 
 	// Unprotected Routes
+	r.GET("/api/users/:id", userHandler.GetUserInformation)
 	r.GET("/api/threads/:id", threadHandler.GetThread)
 	r.GET("/api/threads/category/:category_id", threadHandler.GetAllThreadsByCategory)
 	r.GET("/api/comments", commentHandler.GetAllComments)
@@ -35,7 +36,6 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	api.Use(middleware.BanCheckMiddleware(db))
 
 	// Users
-	api.GET("/users/:id", userHandler.GetUserInformation)
 	api.GET("/users", userHandler.GetRoleIDandReputation)
 	api.GET("/users/:username/id", userHandler.GetUserIDbyUsername)
 	api.GET("/users/banned-users", userHandler.GetBannedUsers)
