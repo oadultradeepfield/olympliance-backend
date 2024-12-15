@@ -150,33 +150,6 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Password updated successfully"})
 }
 
-func (h *UserHandler) GetBannedUsers(c *gin.Context) {
-	currentUser, exists := c.Get("user")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	currentUserData, ok := currentUser.(*models.User)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user data"})
-		return
-	}
-
-	if currentUserData.RoleID <= 0 {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to view banned users"})
-		return
-	}
-
-	var bannedUsers []models.User
-	if err := h.db.Where("is_banned = ?", true).Find(&bannedUsers).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve banned users"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"banned_users": bannedUsers})
-}
-
 func (h *UserHandler) ToggleBanUser(c *gin.Context) {
 	userID := c.Param("id")
 
@@ -232,33 +205,6 @@ func (h *UserHandler) ToggleBanUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "User ban status toggled successfully"})
-}
-
-func (h *UserHandler) GetModerators(c *gin.Context) {
-	currentUser, exists := c.Get("user")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	currentUserData, ok := currentUser.(*models.User)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user data"})
-		return
-	}
-
-	if currentUserData.RoleID <= 1 {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to view moderators"})
-		return
-	}
-
-	var moderators []models.User
-	if err := h.db.Where("role_id = ?", 1).Find(&moderators).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve moderators"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"moderators": moderators})
 }
 
 func (h *UserHandler) ToggleAssignModerator(c *gin.Context) {
