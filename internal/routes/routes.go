@@ -36,6 +36,9 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 
 	// Users
 	api.GET("/users", userHandler.GetRoleIDandReputation)
+	api.GET("/users/:username/id", userHandler.GetUserIDbyUsername)
+	api.GET("/users/banned-users", userHandler.GetBannedUsers)
+	api.GET("/users/moderators", userHandler.GetModerators)
 	api.PUT("/users/change-password", userHandler.ChangePassword)
 	api.PUT("/users/:id/toggle-ban", userHandler.ToggleBanUser)
 	api.PUT("/users/:id/toggle-moderator", userHandler.ToggleAssignModerator)
