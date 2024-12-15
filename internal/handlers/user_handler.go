@@ -48,6 +48,11 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 		return
 	}
 
+	if len(input.NewPassword) < 8 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Password must be at least 8 characters long"})
+		return
+	}
+
 	user, exists := c.Get("user")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})

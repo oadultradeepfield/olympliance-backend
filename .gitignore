@@ -1,4 +1,5 @@
 .env
 *.DS_Store
 .air.toml
-tmp
+tmp/
+tests/
