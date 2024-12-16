@@ -120,7 +120,7 @@ func (h *ThreadHandler) GetFollowedThreads(c *gin.Context) {
 
 	if len(threadIds) > 0 {
 		query := h.db.Model(&models.Thread{}).
-			Where("id IN ?", threadIds).
+			Where("thread_id IN ?", threadIds).
 			Where("is_deleted = ?", showDeleted).
 			Limit(perPageInt).
 			Offset(offset)
