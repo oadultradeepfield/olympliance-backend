@@ -76,6 +76,31 @@ func (h *ThreadHandler) GetThread(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"thread": thread})
 }
 
+func (h *ThreadHandler) GetFollowedThreads(c *gin.Context) {
+	userId := c.Param("id")
+	var threads []models.Thread
+
+	var interactions []models.Interaction
+	if err := h.db.Where("user_id = ? AND interaction_type = ?", userId, "follow").Find(&interactions).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch interactions"})
+		return
+	}
+
+	var threadIds []uint
+	for _, interaction := range interactions {
+		threadIds = append(threadIds, interaction.ThreadID)
+	}
+
+	if len(threadIds) > 0 {
+		if err := h.db.Where("id IN ?", threadIds).Find(&threads).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch threads"})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"threads": threads})
+}
+
 func (h *ThreadHandler) UpdateThread(c *gin.Context) {
 	threadID := c.Param("id")
 	var input struct {

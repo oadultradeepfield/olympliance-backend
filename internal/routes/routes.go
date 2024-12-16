@@ -46,6 +46,7 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	api.POST("/threads", threadHandler.CreateThread)
 	api.PUT("/threads/:id", threadHandler.UpdateThread)
 	api.DELETE("/threads/:id", threadHandler.DeleteThread)
+	api.GET("/followed-threads/:id", threadHandler.GetFollowedThreads)
 
 	// Comments
 	api.POST("/comments", commentHandler.CreateComment)
