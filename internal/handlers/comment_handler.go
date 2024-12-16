@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -169,8 +170,26 @@ func (h *CommentHandler) GetAllComments(c *gin.Context) {
 		return
 	}
 
+	page := c.DefaultQuery("page", "1")
+	perPage := c.DefaultQuery("per_page", "10")
+
+	pageInt, err := strconv.Atoi(page)
+	if err != nil || pageInt < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page number"})
+		return
+	}
+	perPageInt, err := strconv.Atoi(perPage)
+	if err != nil || perPageInt < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid per_page number"})
+		return
+	}
+
+	offset := (pageInt - 1) * perPageInt
+
 	query := h.db.Model(&models.Comment{}).
-		Where("is_deleted = ?", showDeleted)
+		Where("is_deleted = ?", showDeleted).
+		Limit(perPageInt).
+		Offset(offset)
 
 	if threadIDStr != "" {
 		threadID, err := strconv.ParseUint(threadIDStr, 10, 64)
@@ -181,12 +200,21 @@ func (h *CommentHandler) GetAllComments(c *gin.Context) {
 		query = query.Where("thread_id = ?", threadID)
 	}
 
-	query = query.Order(sortBy + " DESC")
+	if sortBy == "upvotes" {
+		query = query.Order(fmt.Sprintf("stats->>'%s' DESC", sortBy))
+	} else {
+		query = query.Order(sortBy + " DESC")
+	}
 
 	if err := query.Find(&comments).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch comments"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"comments": comments})
+	c.JSON(http.StatusOK, gin.H{
+		"comments": comments,
+		"page":     pageInt,
+		"per_page": perPageInt,
+		"total":    len(comments),
+	})
 }
