@@ -80,6 +80,33 @@ func (h *ThreadHandler) GetFollowedThreads(c *gin.Context) {
 	userId := c.Param("id")
 	var threads []models.Thread
 
+	isDeleted := c.DefaultQuery("is_deleted", "false")
+	showDeleted := isDeleted == "true"
+
+	sortBy := c.DefaultQuery("sort_by", "updated_at")
+
+	validSortFields := []string{"upvotes", "comments", "created_at", "updated_at"}
+	if !contains(validSortFields, sortBy) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid sort_by field"})
+		return
+	}
+
+	page := c.DefaultQuery("page", "1")
+	perPage := c.DefaultQuery("per_page", "10")
+
+	pageInt, err := strconv.Atoi(page)
+	if err != nil || pageInt < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page number"})
+		return
+	}
+	perPageInt, err := strconv.Atoi(perPage)
+	if err != nil || perPageInt < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid per_page number"})
+		return
+	}
+
+	offset := (pageInt - 1) * perPageInt
+
 	var interactions []models.Interaction
 	if err := h.db.Where("user_id = ? AND interaction_type = ?", userId, "follow").Find(&interactions).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch interactions"})
@@ -92,7 +119,19 @@ func (h *ThreadHandler) GetFollowedThreads(c *gin.Context) {
 	}
 
 	if len(threadIds) > 0 {
-		if err := h.db.Where("id IN ?", threadIds).Find(&threads).Error; err != nil {
+		query := h.db.Model(&models.Thread{}).
+			Where("id IN ?", threadIds).
+			Where("is_deleted = ?", showDeleted).
+			Limit(perPageInt).
+			Offset(offset)
+
+		if sortBy == "followers" || sortBy == "upvotes" || sortBy == "comments" {
+			query = query.Order(fmt.Sprintf("stats->>'%s' DESC", sortBy))
+		} else {
+			query = query.Order(sortBy + " DESC")
+		}
+
+		if err := query.Find(&threads).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch threads"})
 			return
 		}
@@ -199,7 +238,7 @@ func (h *ThreadHandler) GetAllThreadsByCategory(c *gin.Context) {
 
 	sortBy := c.DefaultQuery("sort_by", "updated_at")
 
-	validSortFields := []string{"views", "followers", "upvotes", "comments", "created_at", "updated_at"}
+	validSortFields := []string{"upvotes", "comments", "created_at", "updated_at"}
 	if !contains(validSortFields, sortBy) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid sort_by field"})
 		return
