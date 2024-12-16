@@ -77,7 +77,7 @@ func (h *UserHandler) GetUserIDbyUsername(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"user_id": targetUser.UserID})
 }
 
-func (h *UserHandler) GetRoleIDandReputation(c *gin.Context) {
+func (h *UserHandler) GetUserIDRoleIDandReputation(c *gin.Context) {
 	user, exists := c.Get("user")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
@@ -91,6 +91,7 @@ func (h *UserHandler) GetRoleIDandReputation(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
+		"user_id":    currentUser.UserID,
 		"role_id":    currentUser.RoleID,
 		"reputation": currentUser.Reputation,
 	})
