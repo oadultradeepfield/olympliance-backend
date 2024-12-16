@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -198,9 +199,14 @@ func (h *ThreadHandler) GetAllThreadsByCategory(c *gin.Context) {
 	query := h.db.Model(&models.Thread{}).
 		Where("category_id = ?", categoryID).
 		Where("is_deleted = ?", showDeleted).
-		Order(sortBy + " DESC").
 		Limit(perPageInt).
 		Offset(offset)
+
+	if sortBy == "followers" || sortBy == "upvotes" || sortBy == "comments" {
+		query = query.Order(fmt.Sprintf("stats->>'%s' DESC", sortBy))
+	} else {
+		query = query.Order(sortBy + " DESC")
+	}
 
 	if err := query.Find(&threads).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch threads"})
