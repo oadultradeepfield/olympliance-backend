@@ -25,6 +25,7 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	r.GET("/api/threads/:id", threadHandler.GetThread)
 	r.GET("/api/threads/category/:category_id", threadHandler.GetAllThreadsByCategory)
 	r.GET("/api/comments", commentHandler.GetAllComments)
+	r.GET("/api/interactions", interactionHandler.GetInteraction)
 
 	// Authentication Routes
 	r.POST("/api/register", authHandler.Register)
@@ -54,7 +55,6 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	api.DELETE("/comments/:id", commentHandler.DeleteComment)
 
 	// Interaction
-	api.GET("/interactions", interactionHandler.GetInteraction)
 	api.POST("/interactions", interactionHandler.CreateInteraction)
 	api.PUT("/interactions/:id", interactionHandler.UpdateInteraction)
 }

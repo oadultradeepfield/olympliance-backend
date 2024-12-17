@@ -19,6 +19,7 @@ func NewInteractionHandler(db *gorm.DB) *InteractionHandler {
 }
 
 func (h *InteractionHandler) GetInteraction(c *gin.Context) {
+	userID := c.Query("user_id")
 	threadID := c.Query("thread_id")
 	commentID := c.Query("comment_id")
 
@@ -27,20 +28,8 @@ func (h *InteractionHandler) GetInteraction(c *gin.Context) {
 		return
 	}
 
-	user, exists := c.Get("user")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	currentUser, ok := user.(*models.User)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user data"})
-		return
-	}
-
 	var interactions []models.Interaction
-	query := h.db.Where("user_id = ?", currentUser.UserID)
+	query := h.db.Where("user_id = ?", userID)
 
 	if threadID != "" {
 		query = query.Where("thread_id = ?", threadID)
