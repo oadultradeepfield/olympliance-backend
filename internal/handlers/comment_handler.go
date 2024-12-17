@@ -160,8 +160,6 @@ func (h *CommentHandler) GetAllComments(c *gin.Context) {
 	var comments []models.Comment
 
 	threadIDStr := c.DefaultQuery("thread_id", "")
-	isDeleted := c.DefaultQuery("is_deleted", "false")
-	showDeleted := isDeleted == "true"
 	sortBy := c.DefaultQuery("sort_by", "updated_at")
 
 	validSortFields := []string{"upvotes", "created_at", "updated_at"}
@@ -187,7 +185,6 @@ func (h *CommentHandler) GetAllComments(c *gin.Context) {
 	offset := (pageInt - 1) * perPageInt
 
 	query := h.db.Model(&models.Comment{}).
-		Where("is_deleted = ?", showDeleted).
 		Limit(perPageInt).
 		Offset(offset)
 
