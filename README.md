@@ -9,7 +9,7 @@
 
 ### 1.1 Description
 
-**Olympliance (Olympiad + Alliance)** is a web forum created for high school students to discuss Science Olympiad problems as they prepare for higher-level competitions. This project was developed as part of the CVWO Assignment AY2024/25 for the School of Computing, National University of Singapore (NUS). For more details, please visit this [link](https://www.comp.nus.edu.sg/~vwo/).
+**Olympliance (Olympiad + Alliance)** is a web forum created for high school students to discuss Science Olympiad problems as they prepare for higher-level competitions. This project was developed as part of the CVWO Assignment AY2024/25 for the School of Computing, National University of Singapore (NUS). For more details, please visit this [link](https://www.comp.nus.edu.sg/~vwo/). Feel free to also visit the [frontend repo](https://github.com/oadultradeepfield/olympliance-frontend) for the full context.
 
 - **Author**: Phanuphat Srisukhawasu
 - **Matriculation Number**: A0311151B
@@ -32,6 +32,12 @@
   - [3.2 Local Development](#32-local-development)
 - [4. Deployment](#4-deployment)
 - [5. API Documentation](#5-api-documentation)
+  - [5.1 Authentication Endpoints](#51-authentication-endpoints)
+  - [5.2 User Endpoints](#52-user-endpoints)
+  - [5.3 Thread Endpoints](#53-thread-enpoints)
+  - [5.4 Comment Endpoints](#54-comment-endpoints)
+  - [5.5 Interaction Endpoints](#55-interaction-endpoints)
+  - [Extra: User Reputation Calculator](#extra-user-reputation-calculator)
 - [6. Acknowledgment](#6-acknowledgment)
 - [7. License](#7-license)
 
