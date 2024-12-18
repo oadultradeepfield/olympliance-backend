@@ -29,7 +29,7 @@
 - [2. Table of Contents](#2-table-of-contents)
 - [3. Getting Started](#3-getting-started)
   - [3.1 Installation](#31-installation)
-  - [3.2 Local Development](#32-local-development)
+  - [3.2 Build and Run the App](#32-build-and-run-the-app)
 - [4. Deployment](#4-deployment)
 - [5. API Documentation](#5-api-documentation)
   - [5.1 Authentication Endpoints](#51-authentication-endpoints)
