@@ -29,7 +29,7 @@
 - [2. Table of Contents](#2-table-of-contents)
 - [3. Getting Started](#3-getting-started)
   - [3.1 Installation](#31-installation)
-  - [3.2 Build and Run the App](#32-build-and-run-the-app)
+  - [3.2 Building and Running the App](#32-building-and-running-the-app)
 - [4. Deployment](#4-deployment)
 - [5. API Documentation](#5-api-documentation)
   - [5.1 Authentication Endpoints](#51-authentication-endpoints)
@@ -68,7 +68,7 @@ The `DSN` variable is the database connection string, which can be obtained from
 postgresql://[role]:[password]@[hostname]/[database]?sslmode=require
 ```
 
-### 3.2 Build and Run the App
+### 3.2 Building and Running the App
 
 This Go application is containerized using Docker. To simplify the setup, it is recommended to use Docker CLI tools to build the app. Please ensure that [Docker](https://docs.docker.com/desktop/) is installed. If you prefer to do local development (optional), make sure you also have Go installed.
 
