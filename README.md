@@ -11,6 +11,9 @@
 
 **Olympliance (Olympiad + Alliance)** is a web forum created for high school students to discuss Science Olympiad problems as they prepare for higher-level competitions. This project was developed as part of the CVWO Assignment AY2024/25 for the School of Computing, National University of Singapore (NUS). For more details, please visit this [link](https://www.comp.nus.edu.sg/~vwo/).
 
+- **Author**: Phanuphat Srisukhawasu
+- **Student ID**: A0311151B
+
 ### 1.2 Tech Stack
 
 - **Programming Language**: Go
@@ -23,17 +26,18 @@
 - [1. About the Project](#1-about-the-project)
   - [1.1 Description](#11-description)
   - [1.2 Tech Stack](#12-tech-stack)
-- [2. Getting Started](#2-getting-started)
-  - [2.1 Installation](#21-installation)
-  - [2.2 Local Development](#22-local-development)
-- [3. Deployment](#3-deployment)
-- [4. API Documentation](#4-api-documentation)
-- [5. Acknowledgment](#5-acknowledgment)
-- [6. License](#6-license)
+- [2. Table of Contents](#2-table-of-contents)
+- [3. Getting Started](#3-getting-started)
+  - [3.1 Installation](#31-installation)
+  - [3.2 Local Development](#32-local-development)
+- [4. Deployment](#4-deployment)
+- [5. API Documentation](#5-api-documentation)
+- [6. Acknowledgment](#6-acknowledgment)
+- [7. License](#7-license)
 
-## 2. Getting Started
+## 3. Getting Started
 
-### 2.1 Installation
+### 3.1 Installation
 
 Start by cloning this repository:
 
@@ -58,7 +62,7 @@ The `DSN` variable is the database connection string, which can be obtained from
 postgresql://[role]:[password]@[hostname]/[database]?sslmode=require
 ```
 
-### 2.2 Local Development
+### 3.2 Local Development
 
 This Go application is containerized using Docker. To simplify the setup, it is recommended to use Docker CLI tools to start the local development server. To build and run the Docker container, use the following command:
 
@@ -78,7 +82,7 @@ By default, the app will run on `PORT 8080`. To verify if the server is running 
 { "status": "ok" }
 ```
 
-## 3. Deployment
+## 4. Deployment
 
 To deploy using Google Cloud Run, ensure that the `gcloud` CLI is installed on your local machine and set up for authentication. Refer to the installation guide on this [page](https://cloud.google.com/sdk/docs/install) for detailed instructions.
 
@@ -124,9 +128,9 @@ services:
     restart: unless-stopped
 ```
 
-## 4. API Documentation
+## 5. API Documentation
 
-## 5. Acknowledgment
+## 6. Acknowledgment
 
 I would like to express my heartfelt gratitude to my seniors who introduced me to CVWO well in advance. Their guidance allowed me to prepare and familiarize myself with the tech stack throughout the first semester, which significantly streamlined the development process.
 
@@ -134,6 +138,6 @@ I also want to acknowledge the incredible creators who provided invaluable tutor
 
 Lastly, I want to thank the School of Computing for offering this program and opportunity. Working on this project has taught me more than I ever anticipated. The challenges of debugging and integrating multiple programming components have reshaped the way I approach problem-solving and coding. Additionally, I’ve grown to appreciate Docker for its incredible ability to make everything so portable and efficient.
 
-## 6. License
+## 7. License
 
 This project is licensed under the MIT License. You can view the full license text in the [LICENSE](/LICENSE) file.
