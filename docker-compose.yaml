@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: olympliance-server:latest
+    platform: linux/amd64
     ports:
       - "8080:8080"
     environment:
