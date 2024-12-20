@@ -81,13 +81,8 @@ go version
 To build and run the Docker container, use the following command:
 
 ```bash
-docker compose up --build
-```
-
-Alternatively, you can build the Docker image separately and run it later using Docker Desktop:
-
-```bash
-docker compose build
+docker build -t olympliance-server:latest .
+docker run --env-file .env -d --name olympliance-server -p 8080:8080 olympliance-server:latest
 ```
 
 By default, the app will run on `PORT 8080`. To verify if the server is running correctly, visit [http://localhost:8080/health](http://localhost:8080/health). The server should return:
@@ -121,25 +116,10 @@ After the image is pushed, navigate to Google Cloud Run in the Google Cloud Cons
 
 **Note**: If you are using macOS devices with ARM architecture, ensure that you build the Docker image with the `linux/amd64` platform flag to guarantee compatibility with Google Cloud Run. By default, macOS devices build images using the `linux/arm64` platform, which works well for local development but may not run correctly on Google Cloud.
 
-Below is an example of how to configure the [`docker-compose.yaml`](/docker-compose.yaml) file to specify the platform:
+To build a Docker image for pushing to Artifact Registry, use the following command:
 
-```yaml
-services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      platform: linux/amd64 # add this line
-    image: olympliance-server:latest
-    ports:
-      - "8080:8080"
-    environment:
-      - PORT=${PORT}
-      - DSN=${DSN}
-      - JWT_SECRET=${JWT_SECRET}
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
-      - GO_ENVIRONMENT=${GO_ENVIRONMENT}
-    restart: unless-stopped
+```bash
+docker buildx build --platform linux/amd64 -t olympliance-server ./
 ```
 
 ## 5. API Documentation
