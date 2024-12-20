@@ -198,7 +198,7 @@ func (h *CommentHandler) GetAllComments(c *gin.Context) {
 	}
 
 	if sortBy == "upvotes" {
-		query = query.Order(fmt.Sprintf("stats->>'%s' DESC", sortBy))
+		query = query.Order(fmt.Sprintf("stats->>'%s' DESC", sortBy) + ", created_at ASC")
 	} else {
 		query = query.Order(sortBy + " ASC")
 	}

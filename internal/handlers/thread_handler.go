@@ -126,7 +126,7 @@ func (h *ThreadHandler) GetFollowedThreads(c *gin.Context) {
 			Offset(offset)
 
 		if sortBy == "followers" || sortBy == "upvotes" || sortBy == "comments" {
-			query = query.Order(fmt.Sprintf("stats->>'%s' DESC", sortBy))
+			query = query.Order(fmt.Sprintf("stats->>'%s' DESC", sortBy) + ", created_at DESC")
 		} else {
 			query = query.Order(sortBy + " DESC")
 		}
