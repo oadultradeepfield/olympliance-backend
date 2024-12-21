@@ -98,6 +98,28 @@ func (h *UserHandler) GetCurrentUserInformation(c *gin.Context) {
 	})
 }
 
+func (h *UserHandler) GetLeaderboard(c *gin.Context) {
+	var users []models.User
+
+	if err := h.db.Order("reputation desc").Limit(10).Find(&users).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch leaderboard"})
+		return
+	}
+
+	leaderboard := make([]gin.H, len(users))
+	for i, user := range users {
+		leaderboard[i] = gin.H{
+			"user_id":    user.UserID,
+			"username":   user.Username,
+			"reputation": user.Reputation,
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"leaderboard": leaderboard,
+	})
+}
+
 func (h *UserHandler) ChangePassword(c *gin.Context) {
 	var input struct {
 		CurrentPassword string `json:"current_password" binding:"required"`
