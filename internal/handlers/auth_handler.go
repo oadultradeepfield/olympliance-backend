@@ -105,28 +105,24 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	h.db.Model(&user).Update("RefreshToken", refreshToken)
+	c.SetCookie("refresh_token", refreshToken, 7*24*60*60, "/", "", true, true)
 
 	c.JSON(http.StatusOK, gin.H{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
+		"access_token": accessToken,
 	})
 }
 
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
-	var input struct {
-		RefreshToken string `json:"refresh_token" binding:"required"`
-	}
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	refreshToken, err := c.Cookie("refresh_token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token missing"})
 		return
 	}
 
 	claims := &jwt.RegisteredClaims{}
 	secretKey := os.Getenv("JWT_SECRET")
 
-	token, err := jwt.ParseWithClaims(input.RefreshToken, claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
 	})
 	if err != nil || !token.Valid {
@@ -135,8 +131,8 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := h.db.Where("refresh_token = ?", input.RefreshToken).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token not recognized"})
+	if err := h.db.Where("user_id = ?", claims.Subject).First(&user).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 		return
 	}
 
