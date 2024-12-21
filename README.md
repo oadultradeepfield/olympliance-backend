@@ -126,12 +126,13 @@ docker buildx build --platform linux/amd64 -t olympliance-server ./
 
 ### 5.1 Authentication Endpoints
 
-This app uses username-based authentication with JWT. Note that there is no JWT refresh token. As a result, the authentication is valid for 24 hours before it becomes invalid.
+This app uses username-based authentication with JWT. Note that there is a JWT refresh token with an expiration period of a week. As a result, the access token is valid for 15 minutes before the app exchanges a new access token using the refresh token.
 
-| **URL**                  | **Body**                                         | **Authorization Header** | **Meaning**                                                                                  |
-| ------------------------ | ------------------------------------------------ | ------------------------ | -------------------------------------------------------------------------------------------- |
-| **POST** `/api/register` | `{ "username": "string", "password": "string" }` | None                     | Endpoint to register a new user. Requires `username` and `password`.                         |
-| **POST** `/api/login`    | `{ "username": "string", "password": "string" }` | None                     | Endpoint for user login. Requires `username` and `password`. Returns a JWT token on success. |
+| **URL**                       | **Body**                                         | **Authorization Header** | **Meaning**                                                                                                                                                                      |
+| ----------------------------- | ------------------------------------------------ | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **POST** `/api/register`      | `{ "username": "string", "password": "string" }` | None                     | Endpoint to register a new user. Requires `username` and `password`.                                                                                                             |
+| **POST** `/api/login`         | `{ "username": "string", "password": "string" }` | None                     | Endpoint for user login. Requires `username` and `password`. Returns both a JWT token and a refresh token upon success.                                                          |
+| **POST** `/api/refresh-token` | `{ "refresh_token": "string" }`                  | None                     | Endpoint to refresh the JWT token. Requires a valid `refresh_token`. Returns a new JWT token upon success, allowing continued access without requiring the user to log in again. |
 
 ### 5.2 User Endpoints
 

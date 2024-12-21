@@ -37,6 +37,9 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	api.Use(middleware.AuthMiddleware(db))
 	api.Use(middleware.BanCheckMiddleware(db))
 
+	// Refresh Token Routes
+	api.POST("/refresh-token", authHandler.RefreshToken)
+
 	// Users
 	api.GET("/users", userHandler.GetCurrentUserInformation)
 	api.GET("/users/get-id/:username", userHandler.GetUserIDbyUsername)
