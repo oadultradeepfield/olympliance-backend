@@ -105,7 +105,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("refresh_token", refreshToken, 7*24*60*60, "/", "", true, true)
+	c.SetCookie("refresh_token", refreshToken, 7*24*60*60, "/", "localhost", false, true)
 
 	c.JSON(http.StatusOK, gin.H{
 		"access_token": accessToken,
@@ -116,6 +116,18 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token missing"})
+		return
+	}
+
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	currentUser, ok := user.(*models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user data"})
 		return
 	}
 
@@ -130,14 +142,8 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	var user models.User
-	if err := h.db.Where("user_id = ?", claims.Subject).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
-		return
-	}
-
 	accessTokenClaims := middleware.Claims{
-		UserID: user.UserID,
+		UserID: currentUser.UserID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 		},
