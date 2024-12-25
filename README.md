@@ -21,6 +21,12 @@
 - **Database**: PostgreSQL (hosted on Neon)
 - **Deployment**: Docker and Google Cloud Run
 
+### 1.3 Database Schema
+
+The database schema is designed to facilitate the relationships between users, threads, comments, and interactions. Below is the ER diagram illustrating the structure. The diagram was generated using Database Markup Language (DBML) on [dbdiagram.io](https://dbdiagram.io/d/Olympliance-6759091ee9daa85aca537ff5).
+
+![Database Schema](/figure/schema.png)
+
 ## 2. Table of Contents
 
 - [1. About the Project](#1-about-the-project)
