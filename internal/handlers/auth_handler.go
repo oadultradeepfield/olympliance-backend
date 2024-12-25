@@ -75,6 +75,11 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	var user models.User
+	if user.GoogleID != "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Account created with Google, login via Google only"})
+		return
+	}
+
 	if err := h.db.Where("username = ?", input.Username).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return

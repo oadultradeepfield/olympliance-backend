@@ -27,7 +27,7 @@ var googleOAuth2Config = oauth2.Config{
 }
 
 func (h *AuthHandler) GoogleLogin(c *gin.Context) {
-	url := googleOAuth2Config.AuthCodeURL("", oauth2.AccessTypeOffline)
+	url := googleOAuth2Config.AuthCodeURL("", oauth2.AccessTypeOffline, oauth2.SetAuthURLParam("prompt", "consent"))
 	c.Redirect(http.StatusFound, url)
 }
 
@@ -92,7 +92,6 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"access_token": accessToken,
-	})
+	redirectURL := os.Getenv("FRONTEND_REDIRECT_URL") + "?access_token=" + accessToken
+	c.Redirect(http.StatusFound, redirectURL)
 }

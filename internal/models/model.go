@@ -14,7 +14,7 @@ type User struct {
 	RoleID       int       `gorm:"default:0;not null" json:"role_id"`
 	Reputation   int       `gorm:"default:0" json:"reputation"`
 	CreatedAt    time.Time `gorm:"autoCreateTime" json:"created_at"`
-	GoogleID     string    `gorm:"unique" json:"google_id"`
+	GoogleID     string    `gorm:"default:null" json:"google_id"`
 	IsBanned     bool      `gorm:"default:false" json:"is_banned"`
 }
 
