@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,12 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	isValidUsername := regexp.MustCompile(`^[a-zA-Z0-9_-]+$`).MatchString
+	if !isValidUsername(input.Username) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Username can only contain letters, numbers, underscores, and dashes"})
 		return
 	}
 
