@@ -101,7 +101,7 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("refresh_token", refreshToken, 7*24*60*60, "/", "localhost", false, true)
+	c.SetCookie("refresh_token", refreshToken, 7*24*60*60, "/", "", false, true)
 
 	redirectURL := os.Getenv("FRONTEND_REDIRECT_URL") + "?access_token=" + accessToken
 	c.Redirect(http.StatusFound, redirectURL)

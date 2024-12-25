@@ -75,13 +75,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	var user models.User
-	if user.GoogleID != "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Account created with Google, login via Google only"})
+	if err := h.db.Where("username = ?", input.Username).First(&user).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
 
-	if err := h.db.Where("username = ?", input.Username).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+	if user.GoogleID != "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Account created with Google, login via Google only"})
 		return
 	}
 
@@ -117,7 +117,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("refresh_token", refreshToken, 7*24*60*60, "/", "localhost", false, true)
+	c.SetCookie("refresh_token", refreshToken, 7*24*60*60, "/", "", false, true)
 
 	c.JSON(http.StatusOK, gin.H{
 		"access_token": accessToken,
