@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -101,7 +102,13 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("refresh_token", refreshToken, 7*24*60*60, "/", "", false, true)
+	backendDomain := os.Getenv("BACKEND_DOMAIN")
+	if backendDomain == "" {
+		backendDomain = "localhost"
+	}
+
+	c.SetCookie("refresh_token", refreshToken, 7*24*60*60, "/", backendDomain, true, true)
+	c.Writer.Header().Set("Set-Cookie", fmt.Sprintf("refresh_token=%s; Path=/; HttpOnly; Secure; SameSite=None", refreshToken))
 
 	redirectURL := os.Getenv("FRONTEND_REDIRECT_URL") + "?access_token=" + accessToken
 	c.Redirect(http.StatusFound, redirectURL)

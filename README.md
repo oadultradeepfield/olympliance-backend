@@ -71,6 +71,7 @@ GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 GOOGLE_REDIRECT_URL=your_server_url
 FRONTEND_REDIRECT_URL=https://www.your-client-url.com/
+BACKEND_DOMAIN=localhost
 ```
 
 The `DSN` variable is the database connection string, which can be obtained from the service you are using for deployment. For Neon, the connection string typically follows this format:
