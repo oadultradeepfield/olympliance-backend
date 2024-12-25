@@ -27,7 +27,7 @@ var googleOAuth2Config = oauth2.Config{
 }
 
 func (h *AuthHandler) GoogleLogin(c *gin.Context) {
-	url := googleOAuth2Config.AuthCodeURL("", oauth2.AccessTypeOffline, oauth2.SetAuthURLParam("prompt", "consent"))
+	url := googleOAuth2Config.AuthCodeURL("", oauth2.AccessTypeOffline)
 	c.Redirect(http.StatusFound, url)
 }
 
