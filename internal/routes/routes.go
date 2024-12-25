@@ -33,8 +33,8 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	r.POST("/api/login", authHandler.Login)
 
 	// Google OAuth Routes
-	r.GET("/auth/google/", authHandler.GoogleLogin)
-	r.GET("/auth/google/callback", authHandler.GoogleCallback)
+	r.GET("/api/auth/google/", authHandler.GoogleLogin)
+	r.GET("/api/auth/google/callback", authHandler.GoogleCallback)
 
 	// Protected Routes
 	api := r.Group("/api")
