@@ -52,7 +52,7 @@ git clone https://github.com/oadultradeepfield/olympliance-backend.git
 cd olympliance-backend
 ```
 
-Before starting the local development server, ensure that the environment variables are correctly configured. Specifically, set up the `.env` file. You can refer to [`.env.example`](/.env.example) for guidance. Below is an example of the default configuration. During development, you can set `ALLOWED_ORIGINS` to `*` to allow requests from any origin. In production, make sure to set `GO_ENVIRONMENT` to `production`.
+Before starting the local development server, ensure that the environment variables are correctly configured. Specifically, set up the `.env` file. You can refer to [`.env.example`](/.env.example) for guidance. Below is an example of the default configuration. During development, you can set `ALLOWED_ORIGINS` to `*` to allow requests from any origin. In production, make sure to set `GO_ENVIRONMENT` to `production`. The variables with the prefix `GOOGLE` are configured to set up Google OAuth. Make sure you configure them first in the Google Cloud Console.
 
 ```
 PORT=8080
@@ -60,6 +60,10 @@ DSN=your_postgres_database_connection_string
 JWT_SECRET=your_jwt_secret_key
 ALLOWED_ORIGINS=https://www.your-client-url.com/
 GO_ENVIRONMENT=development
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URL=your_server_url
+FRONTEND_REDIRECT_URL=https://www.your-client-url.com/
 ```
 
 The `DSN` variable is the database connection string, which can be obtained from the service you are using for deployment. For Neon, the connection string typically follows this format:
@@ -128,11 +132,13 @@ docker buildx build --platform linux/amd64 -t olympliance-server ./
 
 This app uses username-based authentication with JWT. Note that there is a JWT refresh token with an expiration period of a week. As a result, the access token is valid for 15 minutes before the app exchanges a new access token using the refresh token.
 
-| **URL**                       | **Body**                                         | **Authorization Header** | **Meaning**                                                                                                                                                                      |
-| ----------------------------- | ------------------------------------------------ | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **POST** `/api/register`      | `{ "username": "string", "password": "string" }` | None                     | Endpoint to register a new user. Requires `username` and `password`.                                                                                                             |
-| **POST** `/api/login`         | `{ "username": "string", "password": "string" }` | None                     | Endpoint for user login. Requires `username` and `password`. Returns both a JWT token and a refresh token upon success.                                                          |
-| **POST** `/api/refresh-token` | `{ "refresh_token": "string" }`                  | None                     | Endpoint to refresh the JWT token. Requires a valid `refresh_token`. Returns a new JWT token upon success, allowing continued access without requiring the user to log in again. |
+| **URL**                             | **Body**                                         | **Authorization Header** | **Meaning**                                                                                                                                                                                                                                                                  |
+| ----------------------------------- | ------------------------------------------------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **POST** `/api/register`            | `{ "username": "string", "password": "string" }` | None                     | Endpoint to register a new user. Requires `username` and `password`.                                                                                                                                                                                                         |
+| **POST** `/api/login`               | `{ "username": "string", "password": "string" }` | None                     | Endpoint for user login. Requires `username` and `password`. Returns both a JWT token and a refresh token upon success.                                                                                                                                                      |
+| **POST** `/api/refresh-token`       | `{ "refresh_token": "string" }`                  | None                     | Endpoint to refresh the JWT token. Requires a valid `refresh_token`. Returns a new JWT token upon success, allowing continued access without requiring the user to log in again.                                                                                             |
+| **GET** `/api/auth/google`          | None                                             | None                     | Endpoint to redirect to the Google OAuth consent screen for secure sign-in.                                                                                                                                                                                                  |
+| **GET** `/api/auth/google/callback` | None                                             | None                     | Endpoint to handle the Google OAuth2 callback, exchanges the authorization code for an access token, retrieves user information, and creates a new user if one doesn't exist. It generates an access token and redirects the user to the frontend with the token in the URL. |
 
 ### 5.2 User Endpoints
 
@@ -144,6 +150,7 @@ These endpoints are used to manage admin and moderator controls, as well as user
 | **GET** `/api/users`                      | None                                                                                       | `Bearer <token>`         | Get the current user's information.                  |
 | **GET** `/api/leaderboard`                | None                                                                                       | None                     | Get the top 10 users based on reputation.            |
 | **GET** `/api/users/get-id/:username`     | None                                                                                       | `Bearer <token>`         | Get the user ID by the given username.               |
+| **PUT** `/api/users/change-username`      | `{ "new_username": "string", "confirm_username": "string" }`                               | `Bearer <token>`         | Change the current user's username.                  |
 | **PUT** `/api/users/change-password`      | `{ "current_password": "string", "new_password": "string", "confirm_password": "string" }` | `Bearer <token>`         | Change the current user's password.                  |
 | **PUT** `/api/users/:id/toggle-ban`       | None                                                                                       | `Bearer <token>`         | Toggle the ban status of a user by their user ID.    |
 | **PUT** `/api/users/:id/toggle-moderator` | None                                                                                       | `Bearer <token>`         | Toggle moderator status for a user by their user ID. |
