@@ -32,6 +32,7 @@ The database schema is designed to facilitate the relationships between users, t
 - [1. About the Project](#1-about-the-project)
   - [1.1 Description](#11-description)
   - [1.2 Tech Stack](#12-tech-stack)
+  - [1.3 Database Schema](#13-database-schema)
 - [2. Table of Contents](#2-table-of-contents)
 - [3. Getting Started](#3-getting-started)
   - [3.1 Installation](#31-installation)
