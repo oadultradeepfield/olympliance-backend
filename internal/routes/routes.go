@@ -32,6 +32,10 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	r.POST("/api/register", authHandler.Register)
 	r.POST("/api/login", authHandler.Login)
 
+	// Google OAuth Routes
+	r.GET("/auth/google/", authHandler.GoogleLogin)
+	r.GET("/auth/google/callback", authHandler.GoogleCallback)
+
 	// Protected Routes
 	api := r.Group("/api")
 	api.Use(middleware.AuthMiddleware(db))
@@ -43,6 +47,7 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	// Users
 	api.GET("/users", userHandler.GetCurrentUserInformation)
 	api.GET("/users/get-id/:username", userHandler.GetUserIDbyUsername)
+	api.PUT("/users/change-username", userHandler.ChangeUsername)
 	api.PUT("/users/change-password", userHandler.ChangePassword)
 	api.PUT("/users/:id/toggle-ban", userHandler.ToggleBanUser)
 	api.PUT("/users/:id/toggle-moderator", userHandler.ToggleAssignModerator)
