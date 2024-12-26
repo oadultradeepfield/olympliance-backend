@@ -31,6 +31,7 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	// Authentication Routes
 	r.POST("/api/register", authHandler.Register)
 	r.POST("/api/login", authHandler.Login)
+	r.POST("/api/logout", authHandler.Logout)
 
 	// Google OAuth Routes
 	r.GET("/api/auth/google/", authHandler.GoogleLogin)
@@ -40,9 +41,6 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	api := r.Group("/api")
 	api.Use(middleware.AuthMiddleware(db))
 	api.Use(middleware.BanCheckMiddleware(db))
-
-	// Refresh Token Routes
-	api.POST("/refresh-token", authHandler.RefreshToken)
 
 	// Users
 	api.GET("/users", userHandler.GetCurrentUserInformation)

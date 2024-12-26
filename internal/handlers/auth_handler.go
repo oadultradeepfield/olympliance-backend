@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"regexp"
@@ -100,7 +99,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	accessTokenClaims := middleware.Claims{
 		UserID: user.UserID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(5 * time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15)),
 		},
 	}
 	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims).SignedString([]byte(jwtSecret))
@@ -109,8 +108,11 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	refreshTokenClaims := jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
+	refreshTokenClaims := middleware.Claims{
+		UserID: user.UserID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
+		},
 	}
 	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims).SignedString([]byte(jwtSecret))
 	if err != nil {
@@ -123,63 +125,62 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		backendDomain = "localhost"
 	}
 
-	c.SetCookie("refresh_token", refreshToken, 7*24*60*60, "/", backendDomain, true, true)
-	c.Writer.Header().Set("Set-Cookie", fmt.Sprintf("refresh_token=%s; Path=/; HttpOnly; Secure; SameSite=None", refreshToken))
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Path:     "/",
+		Domain:   backendDomain,
+		Expires:  time.Now().Add(7 * 24 * time.Hour),
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
+
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "access_token",
+		Value:    accessToken,
+		Path:     "/",
+		Domain:   backendDomain,
+		Expires:  time.Now().Add(15),
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
 
 	c.JSON(http.StatusOK, gin.H{
-		"access_token": accessToken,
+		"message": "Login successful",
 	})
 }
 
-func (h *AuthHandler) RefreshToken(c *gin.Context) {
-	refreshToken, err := c.Cookie("refresh_token")
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token missing"})
-		return
+func (h *AuthHandler) Logout(c *gin.Context) {
+	backendDomain := os.Getenv("BACKEND_DOMAIN")
+	if backendDomain == "" {
+		backendDomain = "localhost"
 	}
 
-	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "JWT_SECRET not set"})
-		return
-	}
-
-	claims := &jwt.RegisteredClaims{}
-	token, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(jwtSecret), nil
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Path:     "/",
+		Domain:   backendDomain,
+		Expires:  time.Now().Add(5),
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
 	})
 
-	if err != nil || !token.Valid {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
-		return
-	}
-
-	user, exists := c.Get("user")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	currentUser, ok := user.(*models.User)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user data"})
-		return
-	}
-
-	accessTokenClaims := middleware.Claims{
-		UserID: currentUser.UserID,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(5 * time.Minute)),
-		},
-	}
-
-	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims).SignedString([]byte(jwtSecret))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access token"})
-		return
-	}
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		Path:     "/",
+		Domain:   backendDomain,
+		Expires:  time.Now().Add(5),
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
 
 	c.JSON(http.StatusOK, gin.H{
-		"access_token": accessToken,
+		"message": "Logout successful",
 	})
 }

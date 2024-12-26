@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -73,6 +72,10 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 			return
 		}
+		if err := h.db.Where("google_id = ?", userInfo.Sub).First(&user).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch created user"})
+			return
+		}
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
@@ -84,7 +87,7 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 	accessTokenClaims := middleware.Claims{
 		UserID: user.UserID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(5 * time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15)),
 		},
 	}
 	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims).SignedString([]byte(jwtSecret))
@@ -93,8 +96,11 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	refreshTokenClaims := jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
+	refreshTokenClaims := middleware.Claims{
+		UserID: user.UserID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
+		},
 	}
 	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims).SignedString([]byte(jwtSecret))
 	if err != nil {
@@ -107,9 +113,28 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 		backendDomain = "localhost"
 	}
 
-	c.SetCookie("refresh_token", refreshToken, 7*24*60*60, "/", backendDomain, true, true)
-	c.Writer.Header().Set("Set-Cookie", fmt.Sprintf("refresh_token=%s; Path=/; HttpOnly; Secure; SameSite=None", refreshToken))
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Path:     "/",
+		Domain:   backendDomain,
+		Expires:  time.Now().Add(7 * 24 * time.Hour),
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
 
-	redirectURL := os.Getenv("FRONTEND_REDIRECT_URL") + "?access_token=" + accessToken
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "access_token",
+		Value:    accessToken,
+		Path:     "/",
+		Domain:   backendDomain,
+		Expires:  time.Now().Add(15),
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
+
+	redirectURL := os.Getenv("FRONTEND_REDIRECT_URL")
 	c.Redirect(http.StatusFound, redirectURL)
 }
