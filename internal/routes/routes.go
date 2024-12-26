@@ -39,10 +39,14 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	// Protected Routes
 	api := r.Group("/api")
 	api.Use(middleware.AuthMiddleware(db))
+
+	// Logout
+	api.POST("/logout", authHandler.Logout)
+
+	// Below are routes protected from banned users
 	api.Use(middleware.BanCheckMiddleware(db))
 
 	// Users
-	api.POST("/logout", authHandler.Logout)
 	api.GET("/users", userHandler.GetCurrentUserInformation)
 	api.GET("/users/get-id/:username", userHandler.GetUserIDbyUsername)
 	api.PUT("/users/change-username", userHandler.ChangeUsername)
