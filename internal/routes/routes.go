@@ -31,7 +31,6 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	// Authentication Routes
 	r.POST("/api/register", authHandler.Register)
 	r.POST("/api/login", authHandler.Login)
-	r.POST("/api/logout", authHandler.Logout)
 
 	// Google OAuth Routes
 	r.GET("/api/auth/google/", authHandler.GoogleLogin)
@@ -43,6 +42,7 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	api.Use(middleware.BanCheckMiddleware(db))
 
 	// Users
+	api.POST("/logout", authHandler.Logout)
 	api.GET("/users", userHandler.GetCurrentUserInformation)
 	api.GET("/users/get-id/:username", userHandler.GetUserIDbyUsername)
 	api.PUT("/users/change-username", userHandler.ChangeUsername)
