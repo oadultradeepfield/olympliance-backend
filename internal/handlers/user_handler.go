@@ -112,7 +112,7 @@ func (h *UserHandler) GetLeaderboard(c *gin.Context) {
 
 	var leaderboard []gin.H
 	for _, user := range users {
-		if !user.IsBanned {
+		if !user.IsBanned && !user.IsDeleted {
 			leaderboard = append(leaderboard, gin.H{
 				"user_id":    user.UserID,
 				"username":   user.Username,
