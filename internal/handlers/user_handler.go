@@ -37,6 +37,7 @@ func (h *UserHandler) GetUserInformation(c *gin.Context) {
 		"role_id":    user.RoleID,
 		"reputation": user.Reputation,
 		"is_banned":  user.IsBanned,
+		"is_deleted": user.IsDeleted,
 	})
 }
 
@@ -97,6 +98,7 @@ func (h *UserHandler) GetCurrentUserInformation(c *gin.Context) {
 		"role_id":    currentUser.RoleID,
 		"reputation": currentUser.Reputation,
 		"is_banned":  currentUser.IsBanned,
+		"is_deleted": currentUser.IsDeleted,
 	})
 }
 
