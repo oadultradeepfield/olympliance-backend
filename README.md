@@ -150,7 +150,7 @@ This app uses username-based authentication via JWT with an alternative option f
 
 ### 5.2 User Endpoints
 
-These endpoints are used to manage admin and moderator controls, as well as user interactions for tasks such as changing passwords.
+These endpoints are used to manage admin and moderator controls, as well as user interactions for tasks such as changing passwords. Note that some API endpoints are protected from banner users, so they have the same accessibility as the unauthenticated users.
 
 | **URL**                                   | **Body**                                                                                   | **Meaning**                                          |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------- |

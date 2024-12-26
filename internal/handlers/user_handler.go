@@ -96,6 +96,7 @@ func (h *UserHandler) GetCurrentUserInformation(c *gin.Context) {
 		"username":   currentUser.Username,
 		"role_id":    currentUser.RoleID,
 		"reputation": currentUser.Reputation,
+		"is_banned":  currentUser.IsBanned,
 	})
 }
 
