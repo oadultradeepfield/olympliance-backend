@@ -16,6 +16,7 @@ type User struct {
 	CreatedAt    time.Time `gorm:"autoCreateTime" json:"created_at"`
 	GoogleID     string    `gorm:"default:null" json:"google_id"`
 	IsBanned     bool      `gorm:"default:false" json:"is_banned"`
+	IsDeleted    bool      `gorm:"default:false" json:"is_deleted"`
 }
 
 type Thread struct {

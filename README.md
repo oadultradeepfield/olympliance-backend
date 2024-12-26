@@ -156,6 +156,7 @@ These endpoints are used to manage admin and moderator controls, as well as user
 | ----------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
 | **GET** `/api/users/:id`                  | None                                                                                       | Get information for a user with a specific user ID.  |
 | **GET** `/api/users`                      | None                                                                                       | Get the current user's information.                  |
+| **GET** `/api/users/delete`               | None                                                                                       | Delete the account of current logged in users.       |
 | **GET** `/api/leaderboard`                | None                                                                                       | Get the top 10 users based on reputation.            |
 | **GET** `/api/users/get-id/:username`     | None                                                                                       | Get the user ID by the given username.               |
 | **PUT** `/api/users/change-username`      | `{ "new_username": "string", "confirm_username": "string" }`                               | Change the current user's username.                  |

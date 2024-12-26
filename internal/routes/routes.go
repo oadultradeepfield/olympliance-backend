@@ -42,6 +42,7 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 
 	// Users
 	api.GET("/users", userHandler.GetCurrentUserInformation)
+	api.DELETE("/users/delete", userHandler.DeleteUser)
 	api.POST("/logout", authHandler.Logout)
 
 	// Below are routes protected from banned users

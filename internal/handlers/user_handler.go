@@ -341,3 +341,25 @@ func (h *UserHandler) ToggleAssignModerator(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully remove user from moderators"})
 }
+
+func (h *UserHandler) DeleteUser(c *gin.Context) {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	currentUser, ok := user.(*models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user data"})
+		return
+	}
+
+	currentUser.IsDeleted = true
+	if err := h.db.Save(currentUser).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+}
