@@ -102,17 +102,22 @@ func (h *UserHandler) GetCurrentUserInformation(c *gin.Context) {
 func (h *UserHandler) GetLeaderboard(c *gin.Context) {
 	var users []models.User
 
-	if err := h.db.Order("reputation desc").Limit(10).Find(&users).Error; err != nil {
+	if err := h.db.Order("reputation desc").Find(&users).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch leaderboard"})
 		return
 	}
 
-	leaderboard := make([]gin.H, len(users))
-	for i, user := range users {
-		leaderboard[i] = gin.H{
-			"user_id":    user.UserID,
-			"username":   user.Username,
-			"reputation": user.Reputation,
+	var leaderboard []gin.H
+	for _, user := range users {
+		if !user.IsBanned {
+			leaderboard = append(leaderboard, gin.H{
+				"user_id":    user.UserID,
+				"username":   user.Username,
+				"reputation": user.Reputation,
+			})
+			if len(leaderboard) == 10 {
+				break
+			}
 		}
 	}
 
