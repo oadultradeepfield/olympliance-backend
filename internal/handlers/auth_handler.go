@@ -99,7 +99,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	accessTokenClaims := middleware.Claims{
 		UserID: user.UserID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 		},
 	}
 	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims).SignedString([]byte(jwtSecret))
@@ -141,7 +141,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Value:    accessToken,
 		Path:     "/",
 		Domain:   backendDomain,
-		Expires:  time.Now().Add(15),
+		Expires:  time.Now().Add(15 * time.Minute),
 		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteNoneMode,

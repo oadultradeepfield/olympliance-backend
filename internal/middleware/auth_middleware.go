@@ -84,7 +84,7 @@ func handleRefreshFlow(c *gin.Context, db *gorm.DB) bool {
 	accessTokenClaims := Claims{
 		UserID: user.UserID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 		},
 	}
 	newAccessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims).SignedString([]byte(secretKey))
@@ -103,7 +103,7 @@ func handleRefreshFlow(c *gin.Context, db *gorm.DB) bool {
 		Value:    newAccessToken,
 		Path:     "/",
 		Domain:   backendDomain,
-		Expires:  time.Now().Add(15),
+		Expires:  time.Now().Add(15 * time.Minute),
 		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteNoneMode,
