@@ -30,13 +30,14 @@ func setCookie(c *gin.Context, name, value string, maxAge int) {
 		backendDomain = "localhost"
 	}
 
+	c.SetSameSite(http.SameSiteNoneMode)
 	c.SetCookie(
 		name,
 		value,
 		maxAge,
 		"/",
 		backendDomain,
-		false,
+		true, // false for local development
 		true,
 	)
 }
