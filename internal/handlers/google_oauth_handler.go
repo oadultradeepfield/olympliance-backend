@@ -108,32 +108,8 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	backendDomain := os.Getenv("BACKEND_DOMAIN")
-	if backendDomain == "" {
-		backendDomain = "localhost"
-	}
-
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:     "refresh_token",
-		Value:    refreshToken,
-		Path:     "/",
-		Domain:   backendDomain,
-		Expires:  time.Now().Add(7 * 24 * time.Hour),
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-	})
-
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:     "access_token",
-		Value:    accessToken,
-		Path:     "/",
-		Domain:   backendDomain,
-		Expires:  time.Now().Add(15 * time.Minute),
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-	})
+	setCookie(c, "refresh_token", refreshToken, 7*24*60*60)
+	setCookie(c, "access_token", accessToken, 15*60)
 
 	redirectURL := os.Getenv("FRONTEND_REDIRECT_URL")
 	c.Redirect(http.StatusFound, redirectURL)

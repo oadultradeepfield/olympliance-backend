@@ -20,9 +20,8 @@ func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		accessToken, err := c.Cookie("access_token")
 		if err != nil {
-			if !handleRefreshFlow(c, db) {
-				c.Abort()
-			}
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "No access token found"})
+			c.Abort()
 			return
 		}
 
@@ -38,7 +37,7 @@ func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
 			return []byte(secretKey), nil
 		})
 
-		if err != nil || !token.Valid || claims.ExpiresAt.Before(time.Now()) {
+		if err != nil || !token.Valid {
 			if !handleRefreshFlow(c, db) {
 				c.Abort()
 			}
@@ -98,16 +97,16 @@ func handleRefreshFlow(c *gin.Context, db *gorm.DB) bool {
 		backendDomain = "localhost"
 	}
 
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:     "access_token",
-		Value:    newAccessToken,
-		Path:     "/",
-		Domain:   backendDomain,
-		Expires:  time.Now().Add(15 * time.Minute),
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-	})
+	c.SetCookie(
+		"access_token",
+		newAccessToken,
+		int(15*60),
+		"/",
+		"localhost",
+		false,
+		true,
+	)
 	c.Set("user", &user)
+	c.Next()
 	return true
 }

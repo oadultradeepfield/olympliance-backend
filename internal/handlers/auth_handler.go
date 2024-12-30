@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -20,6 +21,24 @@ type AuthHandler struct {
 
 func NewAuthHandler(db *gorm.DB) *AuthHandler {
 	return &AuthHandler{db: db}
+}
+
+func setCookie(c *gin.Context, name, value string, maxAge int) {
+	backendDomain := os.Getenv("BACKEND_DOMAIN")
+	if backendDomain == "" {
+		log.Println("Warning: BACKEND_DOMAIN not set, using default localhost")
+		backendDomain = "localhost"
+	}
+
+	c.SetCookie(
+		name,
+		value,
+		maxAge,
+		"/",
+		backendDomain,
+		false,
+		true,
+	)
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
@@ -125,32 +144,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	backendDomain := os.Getenv("BACKEND_DOMAIN")
-	if backendDomain == "" {
-		backendDomain = "localhost"
-	}
-
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:     "refresh_token",
-		Value:    refreshToken,
-		Path:     "/",
-		Domain:   backendDomain,
-		Expires:  time.Now().Add(7 * 24 * time.Hour),
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-	})
-
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:     "access_token",
-		Value:    accessToken,
-		Path:     "/",
-		Domain:   backendDomain,
-		Expires:  time.Now().Add(15 * time.Minute),
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-	})
+	setCookie(c, "refresh_token", refreshToken, 7*24*60*60)
+	setCookie(c, "access_token", accessToken, 15*60)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
@@ -158,32 +153,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 }
 
 func (h *AuthHandler) Logout(c *gin.Context) {
-	backendDomain := os.Getenv("BACKEND_DOMAIN")
-	if backendDomain == "" {
-		backendDomain = "localhost"
-	}
-
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:     "refresh_token",
-		Value:    "",
-		Path:     "/",
-		Domain:   backendDomain,
-		Expires:  time.Now().Add(5),
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-	})
-
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:     "access_token",
-		Value:    "",
-		Path:     "/",
-		Domain:   backendDomain,
-		Expires:  time.Now().Add(5),
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-	})
+	setCookie(c, "refresh_token", "", -1)
+	setCookie(c, "access_token", "", -1)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Logout successful",
