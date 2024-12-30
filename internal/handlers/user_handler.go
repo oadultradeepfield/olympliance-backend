@@ -19,14 +19,23 @@ func NewUserHandler(db *gorm.DB) *UserHandler {
 }
 
 func (h *UserHandler) GetUserInformation(c *gin.Context) {
-	userID := c.Param("id")
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+	userID := c.DefaultQuery("id", "")
+	username := c.DefaultQuery("username", "")
+
+	if userID == "" && username == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Either User ID or Username is required"})
 		return
 	}
 
 	var user models.User
-	if err := h.db.First(&user, userID).Error; err != nil {
+	var err error
+	if userID != "" {
+		err = h.db.First(&user, "user_id = ?", userID).Error
+	} else if username != "" {
+		err = h.db.First(&user, "username = ?", username).Error
+	}
+
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
@@ -38,6 +47,7 @@ func (h *UserHandler) GetUserInformation(c *gin.Context) {
 		"reputation": user.Reputation,
 		"is_banned":  user.IsBanned,
 		"is_deleted": user.IsDeleted,
+		"created_at": user.CreatedAt,
 	})
 }
 

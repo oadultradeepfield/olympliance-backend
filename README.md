@@ -152,17 +152,17 @@ This app uses username-based authentication via JWT with an alternative option f
 
 These endpoints are used to manage admin and moderator controls, as well as user interactions for tasks such as changing passwords. Note that some API endpoints are protected from banner users, so they have the same accessibility as the unauthenticated users.
 
-| **URL**                                   | **Body**                                                                                   | **Meaning**                                          |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
-| **GET** `/api/users/:id`                  | None                                                                                       | Get information for a user with a specific user ID.  |
-| **GET** `/api/users`                      | None                                                                                       | Get the current user's information.                  |
-| **GET** `/api/users/delete`               | None                                                                                       | Delete the account of current logged in users.       |
-| **GET** `/api/leaderboard`                | None                                                                                       | Get the top 10 users based on reputation.            |
-| **GET** `/api/users/get-id/:username`     | None                                                                                       | Get the user ID by the given username.               |
-| **PUT** `/api/users/change-username`      | `{ "new_username": "string", "confirm_username": "string" }`                               | Change the current user's username.                  |
-| **PUT** `/api/users/change-password`      | `{ "current_password": "string", "new_password": "string", "confirm_password": "string" }` | Change the current user's password.                  |
-| **PUT** `/api/users/:id/toggle-ban`       | None                                                                                       | Toggle the ban status of a user by their user ID.    |
-| **PUT** `/api/users/:id/toggle-moderator` | None                                                                                       | Toggle moderator status for a user by their user ID. |
+| **URL**                                   | **Body**                                                                                   | **Meaning**                                                                   |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| **GET** `/api/userinfo`                   | None                                                                                       | Get information for a user with ID or username (specify either in the query). |
+| **GET** `/api/users`                      | None                                                                                       | Get the current user's information.                                           |
+| **GET** `/api/users/delete`               | None                                                                                       | Delete the account of current logged in users.                                |
+| **GET** `/api/leaderboard`                | None                                                                                       | Get the top 10 users based on reputation.                                     |
+| **GET** `/api/users/get-id/:username`     | None                                                                                       | Get the user ID by the given username.                                        |
+| **PUT** `/api/users/change-username`      | `{ "new_username": "string", "confirm_username": "string" }`                               | Change the current user's username.                                           |
+| **PUT** `/api/users/change-password`      | `{ "current_password": "string", "new_password": "string", "confirm_password": "string" }` | Change the current user's password.                                           |
+| **PUT** `/api/users/:id/toggle-ban`       | None                                                                                       | Toggle the ban status of a user by their user ID.                             |
+| **PUT** `/api/users/:id/toggle-moderator` | None                                                                                       | Toggle moderator status for a user by their user ID.                          |
 
 ### 5.3 Thread Enpoints
 

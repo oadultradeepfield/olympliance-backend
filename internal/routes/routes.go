@@ -21,7 +21,7 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	})
 
 	// Unprotected Routes
-	r.GET("/api/users/:id", userHandler.GetUserInformation)
+	r.GET("/api/userinfo", userHandler.GetUserInformation)
 	r.GET("/api/leaderboard", userHandler.GetLeaderboard)
 	r.GET("/api/threads/:id", threadHandler.GetThread)
 	r.GET("/api/threads/category/:category_id", threadHandler.GetAllThreadsByCategory)
