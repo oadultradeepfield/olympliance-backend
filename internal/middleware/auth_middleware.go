@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/oadultradeepfield/olympliance-server/internal/models"
+	"github.com/oadultradeepfield/olympliance-server/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -92,20 +93,7 @@ func handleRefreshFlow(c *gin.Context, db *gorm.DB) bool {
 		return false
 	}
 
-	backendDomain := os.Getenv("BACKEND_DOMAIN")
-	if backendDomain == "" {
-		backendDomain = "localhost"
-	}
-
-	c.SetCookie(
-		"access_token",
-		newAccessToken,
-		int(15*60),
-		"/",
-		"localhost",
-		false,
-		true,
-	)
+	utils.SetCookie(c, "access_token", newAccessToken, 15*60)
 	c.Set("user", &user)
 	c.Next()
 	return true

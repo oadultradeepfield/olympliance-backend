@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -11,6 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/oadultradeepfield/olympliance-server/internal/middleware"
 	"github.com/oadultradeepfield/olympliance-server/internal/models"
+	"github.com/oadultradeepfield/olympliance-server/internal/utils"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -21,25 +21,6 @@ type AuthHandler struct {
 
 func NewAuthHandler(db *gorm.DB) *AuthHandler {
 	return &AuthHandler{db: db}
-}
-
-func setCookie(c *gin.Context, name, value string, maxAge int) {
-	backendDomain := os.Getenv("BACKEND_DOMAIN")
-	if backendDomain == "" {
-		log.Println("Warning: BACKEND_DOMAIN not set, using default localhost")
-		backendDomain = "localhost"
-	}
-
-	c.SetSameSite(http.SameSiteNoneMode)
-	c.SetCookie(
-		name,
-		value,
-		maxAge,
-		"/",
-		backendDomain,
-		true, // false for local development
-		true,
-	)
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
@@ -145,8 +126,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	setCookie(c, "refresh_token", refreshToken, 7*24*60*60)
-	setCookie(c, "access_token", accessToken, 15*60)
+	utils.SetCookie(c, "refresh_token", refreshToken, 7*24*60*60)
+	utils.SetCookie(c, "access_token", accessToken, 15*60)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
@@ -154,8 +135,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 }
 
 func (h *AuthHandler) Logout(c *gin.Context) {
-	setCookie(c, "refresh_token", "", -1)
-	setCookie(c, "access_token", "", -1)
+	utils.SetCookie(c, "refresh_token", "", -1)
+	utils.SetCookie(c, "access_token", "", -1)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Logout successful",
