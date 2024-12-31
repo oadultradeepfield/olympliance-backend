@@ -27,12 +27,20 @@ The database schema is designed to facilitate the relationships between users, t
 
 ![Database Schema](/figure/schema.png)
 
+### 1.4 Post-CVWO Plan
+
+- Migrate from a RESTful API to GraphQL for more efficient data querying and flexibility.
+- Add a bio section to user profiles for better personalization.
+- Design the admin dashboard to unify the "Toggle Ban" and "Assign Moderator" actions, making it more intuitive and user-friendly.
+- Implement machine learning algorithms to recommend threads to users based on their past activity and interests.
+
 ## 2. Table of Contents
 
 - [1. About the Project](#1-about-the-project)
   - [1.1 Description](#11-description)
   - [1.2 Tech Stack](#12-tech-stack)
   - [1.3 Database Schema](#13-database-schema)
+  - [1.4 Post-CVWO Plan](#14-post-cvwo-plan)
 - [2. Table of Contents](#2-table-of-contents)
 - [3. Getting Started](#3-getting-started)
   - [3.1 Installation](#31-installation)
