@@ -21,8 +21,10 @@ func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		accessToken, err := c.Cookie("access_token")
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "No access token found"})
-			c.Abort()
+			if !handleRefreshFlow(c, db) {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "No access token and refresh token failed"})
+				c.Abort()
+			}
 			return
 		}
 
@@ -40,6 +42,7 @@ func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
 
 		if err != nil || !token.Valid {
 			if !handleRefreshFlow(c, db) {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid access token and refresh token failed"})
 				c.Abort()
 			}
 			return
