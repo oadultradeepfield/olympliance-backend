@@ -29,10 +29,13 @@ The database schema is designed to facilitate the relationships between users, t
 
 ### 1.4 Post-CVWO Plan
 
-- Migrate from a RESTful API to GraphQL for more efficient data querying and flexibility.
-- Add a bio section to user profiles for better personalization.
-- Design the admin dashboard to unify the "Toggle Ban" and "Assign Moderator" actions, making it more intuitive and user-friendly.
-- Implement machine learning algorithms to recommend threads to users based on their past activity and interests.
+1. Migrate to GraphQL for efficient data querying and flexibility.  
+2. Redesign the admin dashboard to unify "Toggle Ban" and "Assign Moderator" actions.  
+3. Add bio sections to user profiles for better personalization.  
+4. Add push notifications with WebSocket for new comments on threads and followed threads.  
+5. Make the forum a PWA for offline use and push notifications.  
+6. Implement AI moderation to detect and flag abusive language for review.  
+7. Add thread recommendations using machine learning based on user activity.  
 
 ## 2. Table of Contents
 
