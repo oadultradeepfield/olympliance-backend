@@ -9,7 +9,6 @@ import (
 )
 
 func SetCookie(c *gin.Context, name, value string, maxAge int) {
-	goEnvironment := os.Getenv("GO_ENVIRONMENT")
 	backendDomain := os.Getenv("BACKEND_DOMAIN")
 	if backendDomain == "" {
 		log.Println("Warning: BACKEND_DOMAIN not set, using default localhost")
@@ -23,7 +22,7 @@ func SetCookie(c *gin.Context, name, value string, maxAge int) {
 		maxAge,
 		"/",
 		backendDomain,
-		goEnvironment == "production",
+		os.Getenv("GO_ENVIRONMENT") == "production",
 		true, // HTTPOnly flag
 	)
 }

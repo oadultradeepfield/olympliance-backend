@@ -91,22 +91,34 @@ postgresql://[role]:[password]@[hostname]/[database]?sslmode=require
 
 ### 3.2 Building and Running the App
 
-This Go application is containerized using Docker. To simplify the setup, it is recommended to use Docker CLI tools to build the app. Please ensure that [Docker](https://docs.docker.com/desktop/) is installed. If you prefer to do local development (optional), make sure you also have Go installed.
+This Go application is containerized using Docker. To simplify the setup, it is recommended to use Docker CLI tools to build the app. Please ensure that [Docker](https://docs.docker.com/desktop/) is installed.
 
-This project uses Go version 1.23.4. You can check your installed Go version or verify if Go is installed by running the following command:
+There are two Dockerfiles available:
+
+- **`Dockerfile.dev`**: For local development with live reloading enabled via `air`.
+- **`Dockerfile`**: For production, optimized without live reloading.
+
+#### Development Mode (with Air for Live Reload)
+
+To build and run the Docker container in development mode with live reloading, use the following command:
 
 ```bash
-go version
+docker build -f Dockerfile.dev -t olympliance-server:latest .
+docker run -v $(pwd):/app --env-file .env -d --name olympliance-server -p 8080:8080 olympliance-server:latest
 ```
 
-To build and run the Docker container, use the following command:
+This will mount your current directory to the container and allow `air` to detect code changes and reload the app automatically.
+
+#### Production Mode
+
+To build and run the Docker container in production mode, use the following command:
 
 ```bash
 docker build -t olympliance-server:latest .
 docker run --env-file .env -d --name olympliance-server -p 8080:8080 olympliance-server:latest
 ```
 
-By default, the app will run on `PORT 8080`. To verify if the server is running correctly, visit [http://localhost:8080/health](http://localhost:8080/health). The server should return:
+By default, the app will run on **PORT 8080**. To verify if the server is running correctly, visit [http://localhost:8080/health](http://localhost:8080/health). The server should return:
 
 ```json
 { "status": "ok" }

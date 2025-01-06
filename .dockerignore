@@ -13,9 +13,6 @@ tmp/
 # Dockerfile
 Dockerfile
 
-# Configuration files
-.air.toml
-
 # Environment variables
 .env
 .env.example
