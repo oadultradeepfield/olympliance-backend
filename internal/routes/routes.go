@@ -2,17 +2,21 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/oadultradeepfield/olympliance-server/internal/handlers"
+	"github.com/oadultradeepfield/olympliance-server/internal/handlers/auth"
+	"github.com/oadultradeepfield/olympliance-server/internal/handlers/comment"
+	"github.com/oadultradeepfield/olympliance-server/internal/handlers/interaction"
+	"github.com/oadultradeepfield/olympliance-server/internal/handlers/thread"
+	"github.com/oadultradeepfield/olympliance-server/internal/handlers/user"
 	"github.com/oadultradeepfield/olympliance-server/internal/middleware"
 	"gorm.io/gorm"
 )
 
 func InitRoutes(r *gin.Engine, db *gorm.DB) {
-	authHandler := handlers.NewAuthHandler(db)
-	userHandler := handlers.NewUserHandler(db)
-	threadHandler := handlers.NewThreadHandler(db)
-	commentHandler := handlers.NewCommentHandler(db)
-	interactionHandler := handlers.NewInteractionHandler(db)
+	authHandler := auth.NewAuthHandler(db)
+	userHandler := user.NewUserHandler(db)
+	threadHandler := thread.NewThreadHandler(db)
+	commentHandler := comment.NewCommentHandler(db)
+	interactionHandler := interaction.NewInteractionHandler(db)
 
 	r.Use(middleware.CorsMiddleware())
 
@@ -31,8 +35,6 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	// Authentication Routes
 	r.POST("/api/register", authHandler.Register)
 	r.POST("/api/login", authHandler.Login)
-
-	// Google OAuth Routes
 	r.GET("/api/auth/google/", authHandler.GoogleLogin)
 	r.GET("/api/auth/google/callback", authHandler.GoogleCallback)
 

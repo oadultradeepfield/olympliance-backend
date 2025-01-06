@@ -1,4 +1,4 @@
-package handlers
+package auth
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/oadultradeepfield/olympliance-server/internal/middleware"
 	"github.com/oadultradeepfield/olympliance-server/internal/models"
-	"github.com/oadultradeepfield/olympliance-server/internal/utils"
+	"github.com/oadultradeepfield/olympliance-server/internal/services"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -109,8 +109,8 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	utils.SetCookie(c, "refresh_token", refreshToken, 7*24*60*60)
-	utils.SetCookie(c, "access_token", accessToken, 15*60)
+	services.SetCookie(c, "refresh_token", refreshToken, 7*24*60*60)
+	services.SetCookie(c, "access_token", accessToken, 15*60)
 
 	redirectURL := os.Getenv("FRONTEND_REDIRECT_URL")
 	c.Redirect(http.StatusFound, redirectURL)

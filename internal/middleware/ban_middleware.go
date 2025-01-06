@@ -29,7 +29,5 @@ func BanCheckMiddleware(db *gorm.DB) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
-		c.Next()
 	}
 }

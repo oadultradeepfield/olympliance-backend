@@ -1,54 +1,13 @@
-package handlers
+package interaction
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/oadultradeepfield/olympliance-server/internal/models"
 	"gorm.io/gorm"
 )
-
-type InteractionHandler struct {
-	db *gorm.DB
-}
-
-func NewInteractionHandler(db *gorm.DB) *InteractionHandler {
-	return &InteractionHandler{db: db}
-}
-
-func (h *InteractionHandler) GetInteraction(c *gin.Context) {
-	userID := c.Query("user_id")
-	threadID := c.Query("thread_id")
-	commentID := c.Query("comment_id")
-
-	if (threadID == "" && commentID == "") || (threadID != "" && commentID != "") {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Either thread_id or comment_id must be provided"})
-		return
-	}
-
-	var interactions []models.Interaction
-	query := h.db.Where("user_id = ?", userID)
-
-	if threadID != "" {
-		query = query.Where("thread_id = ?", threadID)
-	}
-	if commentID != "" {
-		query = query.Where("comment_id = ?", commentID)
-	}
-
-	if err := query.Find(&interactions).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusOK, gin.H{"interactions": []models.Interaction{}})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch interactions"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"interactions": interactions})
-}
 
 func (h *InteractionHandler) CreateInteraction(c *gin.Context) {
 	var input struct {
@@ -257,41 +216,4 @@ func (h *InteractionHandler) UpdateInteraction(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Unexpected interaction update"})
-}
-
-func (h *InteractionHandler) updateThreadStats(threadID uint, interactionType string, adjustment int) error {
-	fields := map[string]string{
-		"upvote":   "upvotes",
-		"downvote": "downvotes",
-		"follow":   "followers",
-	}
-
-	field, exists := fields[interactionType]
-	if !exists {
-		return fmt.Errorf("invalid interaction type: %s", interactionType)
-	}
-
-	return h.db.Model(&models.Thread{}).
-		Where("thread_id = ?", threadID).
-		Update("stats", gorm.Expr(
-			"jsonb_set(stats, '{"+field+"}', to_jsonb(((stats->>'"+field+"')::int + ?)::int))",
-			adjustment)).Error
-}
-
-func (h *InteractionHandler) updateCommentStats(commentID uint, interactionType string, adjustment int) error {
-	fields := map[string]string{
-		"upvote":   "upvotes",
-		"downvote": "downvotes",
-	}
-
-	field, exists := fields[interactionType]
-	if !exists {
-		return fmt.Errorf("invalid interaction type: %s", interactionType)
-	}
-
-	return h.db.Model(&models.Comment{}).
-		Where("comment_id = ?", commentID).
-		Update("stats", gorm.Expr(
-			"jsonb_set(stats, '{"+field+"}', to_jsonb(((stats->>'"+field+"')::int + ?)::int))",
-			adjustment)).Error
 }

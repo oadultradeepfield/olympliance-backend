@@ -1,4 +1,4 @@
-package handlers
+package auth
 
 import (
 	"net/http"
@@ -10,18 +10,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/oadultradeepfield/olympliance-server/internal/middleware"
 	"github.com/oadultradeepfield/olympliance-server/internal/models"
-	"github.com/oadultradeepfield/olympliance-server/internal/utils"
+	"github.com/oadultradeepfield/olympliance-server/internal/services"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
-
-type AuthHandler struct {
-	db *gorm.DB
-}
-
-func NewAuthHandler(db *gorm.DB) *AuthHandler {
-	return &AuthHandler{db: db}
-}
 
 func (h *AuthHandler) Register(c *gin.Context) {
 	var input struct {
@@ -126,8 +117,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	utils.SetCookie(c, "refresh_token", refreshToken, 7*24*60*60)
-	utils.SetCookie(c, "access_token", accessToken, 15*60)
+	services.SetCookie(c, "refresh_token", refreshToken, 7*24*60*60)
+	services.SetCookie(c, "access_token", accessToken, 15*60)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
@@ -135,8 +126,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 }
 
 func (h *AuthHandler) Logout(c *gin.Context) {
-	utils.SetCookie(c, "refresh_token", "", -1)
-	utils.SetCookie(c, "access_token", "", -1)
+	services.SetCookie(c, "refresh_token", "", -1)
+	services.SetCookie(c, "access_token", "", -1)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Logout successful",

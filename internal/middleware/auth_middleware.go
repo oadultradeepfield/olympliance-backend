@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/oadultradeepfield/olympliance-server/internal/models"
-	"github.com/oadultradeepfield/olympliance-server/internal/utils"
+	"github.com/oadultradeepfield/olympliance-server/internal/services"
 	"gorm.io/gorm"
 )
 
@@ -56,7 +56,6 @@ func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		c.Set("user", &user)
-		c.Next()
 	}
 }
 
@@ -96,8 +95,7 @@ func handleRefreshFlow(c *gin.Context, db *gorm.DB) bool {
 		return false
 	}
 
-	utils.SetCookie(c, "access_token", newAccessToken, 15*60)
+	services.SetCookie(c, "access_token", newAccessToken, 15*60)
 	c.Set("user", &user)
-	c.Next()
 	return true
 }

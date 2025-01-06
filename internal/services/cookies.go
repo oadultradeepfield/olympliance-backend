@@ -1,4 +1,4 @@
-package utils
+package services
 
 import (
 	"log"
@@ -9,20 +9,21 @@ import (
 )
 
 func SetCookie(c *gin.Context, name, value string, maxAge int) {
+	goEnvironment := os.Getenv("GO_ENVIRONMENT")
 	backendDomain := os.Getenv("BACKEND_DOMAIN")
 	if backendDomain == "" {
 		log.Println("Warning: BACKEND_DOMAIN not set, using default localhost")
 		backendDomain = "localhost"
 	}
 
-	c.SetSameSite(http.SameSiteNoneMode) // Backend and frontend on different domain
+	c.SetSameSite(http.SameSiteNoneMode)
 	c.SetCookie(
 		name,
 		value,
 		maxAge,
 		"/",
 		backendDomain,
-		true, // Secure flag (false in local development)
+		goEnvironment == "production",
 		true, // HTTPOnly flag
 	)
 }
