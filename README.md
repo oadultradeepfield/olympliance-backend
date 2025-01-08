@@ -107,7 +107,7 @@ docker build -f Dockerfile.dev -t olympliance-server:latest .
 docker run -v $(pwd):/app --env-file .env -d --name olympliance-server -p 8080:8080 olympliance-server:latest
 ```
 
-This will mount your current directory to the container and allow `air` to detect code changes and reload the app automatically.
+This will mount your current directory to the container and allow `air` to detect code changes and reload the app automatically. The example configuration of `air` is specified in [`.air.toml`](.air.toml).
 
 #### Production Mode
 
@@ -200,7 +200,7 @@ The endpoints below are used to perform CRUD operations on threads. Threads are 
 
 ### 5.4 Comment Endpoints
 
-Like threads, comments also support CRUD operations. In fact, comments were designed based on threads. When commenting on comments, the parent_comment_id is used, whereas this field is empty when commenting directly on threads.
+Like threads, comments also support CRUD operations. In fact, comments were designed based on threads. When commenting on comments, the `parent_comment_id` is used, whereas this field is empty when commenting directly on threads.
 
 | **URL**                                                                                                   | **Body**                                                                        | **Meaning**                                                                                                      |
 | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
