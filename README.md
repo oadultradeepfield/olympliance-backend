@@ -29,11 +29,9 @@ The database schema is designed to facilitate the relationships between users, t
 
 ### 1.4 Post-CVWO Plan
 
-1. Migrate to GraphQL for efficient data querying and flexibility.
-2. Add push notifications for new comments and followed threads, plus a real-time user moderation dashboard with WebSocket.
-3. Make the forum a PWA for offline use and push notifications.
-4. Implement AI moderation to detect and flag abusive language for review.
-5. Add thread recommendations using machine learning based on user activity.
+1. Add push notifications for new comments and followed threads, plus a real-time user moderation dashboard with WebSocket.
+2. Make the forum a PWA for offline use and push notifications.
+3. Implement lightweight automatic moderation to detect and flag abusive language for review.
 
 ## 2. Table of Contents
 
